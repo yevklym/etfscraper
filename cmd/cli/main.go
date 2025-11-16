@@ -34,6 +34,21 @@ func main() {
 			fmt.Printf("   Inception: %s\n", fund.InceptionDate.Format("Jan 2, 2006"))
 		}
 		fmt.Println()
+
+		holdingsSnapshot, err := provider.Holdings(context.Background(), fund.Ticker)
+		if err != nil {
+			log.Printf("Failed to get holdings for %s (%s): %v\n", fund.Name, fund.Ticker, err)
+			continue
+		}
+
+		fmt.Printf("Holdings as of:  %s\n", holdingsSnapshot.AsOfDate.Format("Jan 2, 2006"))
+		fmt.Printf("Total holdings: %d\n\n", holdingsSnapshot.TotalHoldings)
+
+		fmt.Println("Top 5 Holdings:")
+		for j, holding := range holdingsSnapshot.Holdings[:min(5, len(holdingsSnapshot.Holdings))] {
+			fmt.Printf("%d. %s (%.2f%%) - $%.2f\n", j+1, holding.Name, holding.Weight*100, holding.MarketValue)
+		}
+		fmt.Println()
 	}
 }
 
