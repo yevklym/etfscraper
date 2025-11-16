@@ -42,6 +42,11 @@ type ISharesETFData struct {
 	AladdinRegion     string `json:"aladdinRegion"`
 }
 
+type iSharesFundMetadata struct {
+	PortfolioID    int
+	ProductPageURL string
+}
+
 const usETFDiscoveryURL = "https://www.ishares.com/us/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/en/us-ishares/ishares-product-screener-backend-config&siteEntryPassthrough=true"
 
 func (c *Client) discoverFromJSON(ctx context.Context) ([]etfscraper.Fund, error) {
@@ -49,12 +54,6 @@ func (c *Client) discoverFromJSON(ctx context.Context) ([]etfscraper.Fund, error
 	if err != nil {
 		return nil, err
 	}
-
-
-	// Set headers to mimic normal browser request
-	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-	req.Header.Set("Referer", "https://www.ishares.com/us/products/etf-investments")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -91,6 +90,11 @@ func (c *Client) convertToFunds(etfData map[string]ISharesETFData) []etfscraper.
 			ExpenseRatio: data.NetExpenseRatio.Raw / 100.0,
 			TotalAssets:  data.TotalNetAssets.Raw,
 			Exchange:     etfscraper.ExchangeNYSE,
+		}
+
+		fund.ProviderMetadata = iSharesFundMetadata{
+			PortfolioID:    data.PortfolioID,
+			ProductPageURL: data.ProductPageUrl,
 		}
 
 		// Parse inception date

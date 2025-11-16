@@ -164,12 +164,13 @@ type Fund struct {
 	TradingSymbol string   `json:"tradingSymbol,omitempty"`
 
 	// Additional metadata
-	CUSIP          string    `json:"cusip,omitempty" validate:"len=9"`
-	SEDOL          string    `json:"sedol,omitempty" validate:"len=7"`
-	Description    string    `json:"description,omitempty"`
-	Objective      string    `json:"objective,omitempty"`
-	ProductPageURL string    `json:"productPageUrl,omitempty"`
-	LastUpdated    time.Time `json:"lastUpdated,omitempty"`
+	CUSIP            string      `json:"cusip,omitempty" validate:"len=9"`
+	SEDOL            string      `json:"sedol,omitempty" validate:"len=7"`
+	Description      string      `json:"description,omitempty"`
+	Objective        string      `json:"objective,omitempty"`
+	ProductPageURL   string      `json:"productPageUrl,omitempty"`
+	LastUpdated      time.Time   `json:"lastUpdated,omitempty"`
+	ProviderMetadata interface{} `json:"-"`
 }
 
 // HoldingsSnapshot represents a point-in-time snapshot of fund holdings
@@ -185,6 +186,5 @@ type HoldingsSnapshot struct {
 	CashWeight  float64 `json:"cashWeight,omitempty"`
 
 	// Metadata
-	Source      string    `json:"source,omitempty"`
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 }
