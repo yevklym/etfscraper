@@ -91,40 +91,6 @@ func (c *Client) generateHoldingsURL(fund etfscraper.Fund) (string, error) {
 	return "", fmt.Errorf("unable to generate holding URL for %s", fund.Ticker)
 }
 
-func (c *Client) downloadCSV(ctx context.Context, url string) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-	req.Header.Set("Accept", "text/csv,application/csv,*/*")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
-	}
-
-	data := make([]byte, 0, resp.ContentLength)
-	buf := make([]byte, 4096)
-	for {
-		n, err := resp.Body.Read(buf)
-		if n > 0 {
-			data = append(data, buf[:n]...)
-		}
-		if err != nil {
-			break
-		}
-	}
-
-	return data, nil
-}
-
 func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscraper.HoldingsSnapshot, error) {
 	csvReader := csv.NewReader(reader)
 	csvReader.LazyQuotes = true
