@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -49,7 +50,7 @@ type iSharesFundMetadata struct {
 
 const usETFDiscoveryURL = "https://www.ishares.com/us/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/en/us-ishares/ishares-product-screener-backend-config&siteEntryPassthrough=true"
 
-func (c *Client) discoverFromJSON(ctx context.Context) ([]etfscraper.Fund, error) {
+func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", usETFDiscoveryURL, nil)
 	if err != nil {
 		return nil, err
@@ -65,49 +66,67 @@ func (c *Client) discoverFromJSON(ctx context.Context) ([]etfscraper.Fund, error
 		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
 
-	var etfData map[string]ISharesETFData
-	if err := json.NewDecoder(resp.Body).Decode(&etfData); err != nil {
-		return nil, fmt.Errorf("failed to decode JSON: %w", err)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	return c.convertToFunds(etfData), nil
+	var result map[string]ISharesETFData
+	if err := json.Unmarshal(body, &result); err != nil {
+		var wrapper struct {
+			I map[string]ISharesETFData `json:"i"`
+		}
+		if err2 := json.Unmarshal(body, &wrapper); err2 != nil {
+			return nil, fmt.Errorf("failed to decode JSON with either format: %w, %w", err, err2)
+		}
+		result = wrapper.I
+	}
+
+	return c.convertToFunds(result), nil
+}
+
+func (c *Client) convertToFundsFromSlice(etfData []ISharesETFData) []etfscraper.Fund {
+	var funds []etfscraper.Fund
+	for _, data := range etfData {
+		fund := c.convertSingleFund(data)
+		funds = append(funds, fund)
+	}
+	return funds
 }
 
 func (c *Client) convertToFunds(etfData map[string]ISharesETFData) []etfscraper.Fund {
 	var funds []etfscraper.Fund
-
 	for _, data := range etfData {
-		if data.FundName == "" || data.LocalExchangeTicker == "" {
-			continue
-		}
+		funds = append(funds, c.convertSingleFund(data))
+	}
+	return funds
+}
 
-		fund := etfscraper.Fund{
-			Ticker:       data.LocalExchangeTicker,
-			Name:         data.FundName,
-			ISIN:         data.ISIN,
-			Provider:     etfscraper.ProviderIShares,
-			Currency:     etfscraper.CurrencyUSD,
-			ExpenseRatio: data.NetExpenseRatio.Raw / 100.0,
-			TotalAssets:  data.TotalNetAssets.Raw,
-			Exchange:     etfscraper.ExchangeNYSE,
-		}
-
-		fund.ProviderMetadata = iSharesFundMetadata{
-			PortfolioID:    data.PortfolioID,
-			ProductPageURL: data.ProductPageUrl,
-		}
-
-		// Parse inception date
-		if data.InceptionDate.Raw > 0 {
-			if date := parseISharesDate(data.InceptionDate.Raw); date != nil {
-				fund.InceptionDate = date
-			}
-		}
-
-		funds = append(funds, fund)
+func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
+	fund := etfscraper.Fund{
+		Ticker:       data.LocalExchangeTicker,
+		Name:         data.FundName,
+		ISIN:         data.ISIN,
+		Provider:     etfscraper.ProviderIShares,
+		Currency:     etfscraper.CurrencyUSD,
+		ExpenseRatio: data.NetExpenseRatio.Raw / 100.0,
+		TotalAssets:  data.TotalNetAssets.Raw,
+		Exchange:     etfscraper.ExchangeNYSE,
 	}
 
-	return funds
+	fund.ProviderMetadata = iSharesFundMetadata{
+		PortfolioID:    data.PortfolioID,
+		ProductPageURL: data.ProductPageUrl,
+	}
+
+	// Parse inception date
+	if data.InceptionDate.Raw > 0 {
+		if date := parseISharesDate(data.InceptionDate.Raw); date != nil {
+			fund.InceptionDate = date
+		}
+	}
+
+	return fund
 }
 
 func parseISharesDate(dateInt int) *time.Time {

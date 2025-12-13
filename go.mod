@@ -2,8 +2,6 @@ module github.com/yevklym/etfscraper
 
 go 1.25.3
 
-require github.com/gocolly/colly/v2 v2.2.0 // indirect
-
 require (
 	github.com/PuerkitoBio/goquery v1.10.2 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
