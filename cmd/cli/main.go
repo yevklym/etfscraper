@@ -16,6 +16,41 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// --- Example Usage of FundInfo() and Holdings() for a specific ETF ---
+	fmt.Println("--- Demonstrating specific fund lookup and holdings ---")
+	exampleTicker := "IVV" // iShares Core S&P 500 ETF
+
+	fmt.Printf("Fetching FundInfo for %s...\n", exampleTicker)
+	specificFund, err := provider.FundInfo(context.Background(), exampleTicker)
+	if err != nil {
+		log.Printf("Failed to get FundInfo for %s: %v\n", exampleTicker, err)
+	} else {
+		fmt.Printf("Found specific fund: %s (%s)\n", specificFund.Name, specificFund.Ticker)
+		fmt.Printf("   ISIN: %s\n", specificFund.ISIN)
+		fmt.Printf("   Expense Ratio: %.2f%%\n", specificFund.ExpenseRatio*100)
+		fmt.Printf("   Assets: $%.1fB\n", specificFund.TotalAssets/1_000_000_000)
+		if specificFund.InceptionDate != nil {
+			fmt.Printf("   Inception: %s\n", specificFund.InceptionDate.Format("Jan 2, 2006"))
+		}
+		fmt.Println()
+
+		fmt.Printf("Fetching Holdings for %s...\n", exampleTicker)
+		specificHoldings, err := provider.Holdings(context.Background(), exampleTicker)
+		if err != nil {
+			log.Printf("Failed to get Holdings for %s: %v\n", exampleTicker, err)
+		} else {
+			fmt.Printf("Holdings as of: %s\n", specificHoldings.AsOfDate.Format("Jan 2, 2006"))
+			fmt.Printf("Total holdings: %d\n\n", specificHoldings.TotalHoldings)
+
+			fmt.Println("Top 3 Holdings:")
+			for k, holding := range specificHoldings.Holdings[:min(3, len(specificHoldings.Holdings))] {
+				fmt.Printf("   %d. %s (%.2f%%) - $%.2f\n", k+1, holding.Name, holding.Weight*100, holding.MarketValue)
+			}
+			fmt.Println("\n-----------------------------------------------------\n")
+		}
+	}
+
+	// --- Example Usage of DiscoverETFs() ---
 	fmt.Println("Discovering ETFs...")
 	funds, err := provider.DiscoverETFs(context.Background())
 	if err != nil {
