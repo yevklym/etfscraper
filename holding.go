@@ -134,18 +134,15 @@ type Holding struct {
 // Fund holds comprehensive metadata about an ETF
 type Fund struct {
 	// Basic identification
-	Ticker   string `json:"ticker,omitempty" validate:"required"`
-	ISIN     string `json:"isin,omitempty" validate:"len=12"`
-	Name     string `json:"name" validate:"required"`
-	FullName string `json:"fullName,omitempty"`
+	Ticker string `json:"ticker,omitempty" validate:"required"`
+	ISIN   string `json:"isin,omitempty" validate:"len=12"`
+	Name   string `json:"name" validate:"required"`
 
 	// Provider information
 	Provider ProviderName `json:"provider,omitempty"`
-	Family   string       `json:"family,omitempty"`
 
 	// Financial details
-	Currency     Currency `json:"currency,omitempty"`
-	BaseCurrency Currency `json:"baseCurrency,omitempty"`
+	Currency Currency `json:"currency,omitempty"`
 
 	// Fund characteristics
 	InceptionDate  *time.Time `json:"inceptionDate,omitempty"`
@@ -160,15 +157,9 @@ type Fund struct {
 	AssetClass AssetClass `json:"assetClass,omitempty"`
 
 	// Trading information
-	Exchange      Exchange `json:"exchange,omitempty"`
-	TradingSymbol string   `json:"tradingSymbol,omitempty"`
+	Exchange Exchange `json:"exchange,omitempty"`
 
 	// Additional metadata
-	CUSIP            string      `json:"cusip,omitempty" validate:"len=9"`
-	SEDOL            string      `json:"sedol,omitempty" validate:"len=7"`
-	Description      string      `json:"description,omitempty"`
-	Objective        string      `json:"objective,omitempty"`
-	ProductPageURL   string      `json:"productPageUrl,omitempty"`
 	LastUpdated      time.Time   `json:"lastUpdated,omitempty"`
 	ProviderMetadata interface{} `json:"-"`
 }
