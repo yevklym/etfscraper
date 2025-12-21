@@ -278,7 +278,10 @@ func getStringField(record []string, columnMap map[string]int, fieldName string)
 	if idx >= len(record) {
 		return "", fmt.Errorf("column %q index %d out of bounds", fieldName, idx)
 	}
-	return strings.TrimSpace(record[idx]), nil
+
+	val := strings.TrimSpace(record[idx])
+	val = strings.Trim(val, "\"")
+	return val, nil
 }
 
 func getFloatField(record []string, columnMap map[string]int, fieldName string) (float64, error) {
