@@ -46,7 +46,7 @@ func main() {
 			for k, holding := range specificHoldings.Holdings[:min(3, len(specificHoldings.Holdings))] {
 				fmt.Printf("   %d. %s (%.2f%%) - $%.2f\n", k+1, holding.Name, holding.Weight*100, holding.MarketValue)
 			}
-			fmt.Println("\n-----------------------------------------------------\n")
+			fmt.Println("-----------------------------------------------------")
 		}
 	}
 
