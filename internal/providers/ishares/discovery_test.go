@@ -116,7 +116,8 @@ func TestConvertSingleFund(t *testing.T) {
 }
 
 func TestFetchAndDecodeFunds(t *testing.T) {
-	sampleJSON := `{
+	t.Run("http 200", func(t *testing.T) {
+		sampleJSON := `{
            "239619":{
                "fundName":"iShares MSCI China ETF",
                "localExchangeTicker":"MCHI",
@@ -128,34 +129,61 @@ func TestFetchAndDecodeFunds(t *testing.T) {
            }
        }`
 
-	mockClient := &mockHTTPClient{
-		ResponseBody: sampleJSON,
-		StatusCode:   http.StatusOK}
+		mockClient := &mockHTTPClient{
+			ResponseBody: sampleJSON,
+			StatusCode:   http.StatusOK}
 
-	c := New("us", mockClient)
+		c := New("us", mockClient)
 
-	funds, err := c.fetchAndDecodeFunds(context.Background())
-	if err != nil {
-		t.Fatalf("Expected no error, but got: %v", err)
-	}
+		funds, err := c.fetchAndDecodeFunds(context.Background())
+		if err != nil {
+			t.Fatalf("Expected no error, but got: %v", err)
+		}
 
-	if len(funds) != 1 {
-		t.Fatalf("Expected 1 fund, but got %d", len(funds))
-	}
+		if len(funds) != 1 {
+			t.Fatalf("Expected 1 fund, but got %d", len(funds))
+		}
 
-	fund := funds[0]
-	expectedTicker := "MCHI"
-	if fund.Ticker != expectedTicker {
-		t.Errorf("Expected ticker %s, but got %s", expectedTicker, fund.Ticker)
-	}
+		fund := funds[0]
+		expectedTicker := "MCHI"
+		if fund.Ticker != expectedTicker {
+			t.Errorf("Expected ticker %s, but got %s", expectedTicker, fund.Ticker)
+		}
 
-	expectedExpenseRatio := 0.0059
-	if fund.ExpenseRatio != expectedExpenseRatio {
-		t.Errorf("Expected expense ratio %.4f, but got %.4f", expectedExpenseRatio, fund.ExpenseRatio)
-	}
+		expectedExpenseRatio := 0.0059
+		if fund.ExpenseRatio != expectedExpenseRatio {
+			t.Errorf("Expected expense ratio %.4f, but got %.4f", expectedExpenseRatio, fund.ExpenseRatio)
+		}
 
-	expectedTotalAssets := 7779803697.05
-	if fund.TotalAssets != expectedTotalAssets {
-		t.Errorf("Expected total assets %.2f, but got %.2f", expectedTotalAssets, fund.TotalAssets)
-	}
+		expectedTotalAssets := 7779803697.05
+		if fund.TotalAssets != expectedTotalAssets {
+			t.Errorf("Expected total assets %.2f, but got %.2f", expectedTotalAssets, fund.TotalAssets)
+		}
+	})
+
+	t.Run("http non-200 status", func(t *testing.T) {
+		mockClient := &mockHTTPClient{
+			ResponseBody: `{}`,
+			StatusCode:   http.StatusNotFound}
+		c := New("us", mockClient)
+
+		_, err := c.fetchAndDecodeFunds(context.Background())
+
+		if err == nil {
+			t.Fatalf("Expected an error for non-200 status, but got nil")
+		}
+	})
+
+	t.Run("malformed json response", func(t *testing.T) {
+		mockClient := &mockHTTPClient{
+			ResponseBody: `invalid json`,
+			StatusCode:   http.StatusOK}
+		c := New("us", mockClient)
+
+		_, err := c.fetchAndDecodeFunds(context.Background())
+
+		if err == nil {
+			t.Fatal("Expected an error for malformed JSON, but got nil")
+		}
+	})
 }
