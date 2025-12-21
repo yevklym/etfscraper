@@ -97,7 +97,7 @@ func getProvider(providerName string) (etfscraper.Provider, error) {
 
 	switch name {
 	case "ishares":
-		return ishares.New(region), nil
+		return ishares.New(region, nil), nil
 	default:
 		return nil, fmt.Errorf("unknown provider: %s", name)
 	}

@@ -14,17 +14,24 @@ import (
 	"github.com/yevklym/etfscraper"
 )
 
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type Client struct {
-	httpClient *http.Client
+	httpClient HTTPClient
 	region     string
 }
 
-func New(region string) *Client {
-	return &Client{
-		httpClient: &http.Client{
+func New(region string, client HTTPClient) *Client {
+	if client == nil {
+		client = &http.Client{
 			Timeout: time.Second * 15,
-		},
-		region: region,
+		}
+	}
+	return &Client{
+		httpClient: client,
+		region:     region,
 	}
 }
 
