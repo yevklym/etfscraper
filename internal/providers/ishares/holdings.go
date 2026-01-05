@@ -50,7 +50,9 @@ func (c *Client) generateHoldingsURL(fund etfscraper.Fund) (string, error) {
 	}
 
 	if metadata.ProductPageURL != "" {
-		return fmt.Sprintf("https://www.ishares.com%s/1467271812596.ajax?fileType=csv", metadata.ProductPageURL), nil
+		return fmt.Sprintf(c.config.HoldingsURLTemplate,
+			c.config.BaseURL,
+			metadata.ProductPageURL), nil
 	}
 
 	return "", fmt.Errorf("unable to generate holding URL for %s", fund.Ticker)

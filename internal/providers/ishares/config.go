@@ -1,20 +1,21 @@
 package ishares
 
 type regionConfig struct {
-	DiscoveryURL       string
-	BaseURL            string
-	HoldingsDownloadID string
+	DiscoveryURL        string
+	BaseURL             string
+	HoldingsDownloadID  string
+	HoldingsURLTemplate string
 }
 
 var regionConfigs = map[string]regionConfig{
 	"us": {
-		DiscoveryURL:       "https://www.ishares.com/us/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/en/us-ishares/ishares-product-screener-backend-config&siteEntryPassthrough=true",
-		BaseURL:            "https://www.ishares.com",
-		HoldingsDownloadID: "1467271812596",
+		DiscoveryURL:        "https://www.ishares.com/us/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/en/us-ishares/ishares-product-screener-backend-config&siteEntryPassthrough=true",
+		BaseURL:             "https://www.ishares.com",
+		HoldingsURLTemplate: "%s%s/1467271812596.ajax?fileType=csv",
 	},
 	"de": {
-		DiscoveryURL:       "https://www.ishares.com/de/privatanleger/de/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/de/germany/product-screener/ishares-product-screener-backend-config&siteEntryPassthrough=true",
-		BaseURL:            "https://www.ishares.com",
-		HoldingsDownloadID: "1506575576011",
+		DiscoveryURL:        "https://www.ishares.com/de/privatanleger/de/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/de/germany/product-screener/ishares-product-screener-backend-config&siteEntryPassthrough=true",
+		BaseURL:             "https://www.ishares.com",
+		HoldingsURLTemplate: "%s%s/fund/1478358465952.ajax?fileType=csv",
 	},
 }
