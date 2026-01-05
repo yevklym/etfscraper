@@ -17,18 +17,26 @@ type HTTPClient interface {
 type Client struct {
 	httpClient HTTPClient
 	region     string
+	config     regionConfig
 }
 
-func New(region string, client HTTPClient) *Client {
+func New(region string, client HTTPClient) (*Client, error) {
 	if client == nil {
 		client = &http.Client{
 			Timeout: time.Second * 15,
 		}
 	}
+
+	config, ok := regionConfigs[strings.ToLower(region)]
+	if !ok {
+		return nil, fmt.Errorf("failed to find config for region '%s'", region)
+	}
+
 	return &Client{
 		httpClient: client,
 		region:     region,
-	}
+		config:     config,
+	}, nil
 }
 
 func (c *Client) DiscoverETFs(ctx context.Context) ([]etfscraper.Fund, error) {

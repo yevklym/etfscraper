@@ -11,6 +11,23 @@ import (
 	"github.com/yevklym/etfscraper"
 )
 
+type isharesDataField struct {
+	Display string  `json:"d"`
+	Raw     float64 `json:"r"`
+}
+
+func (f *isharesDataField) UnmarshalJSON(data []byte) error {
+	if len(data) > 0 && data[0] == '{' {
+		type Alias isharesDataField
+		var aux Alias
+		if err := json.Unmarshal(data, &aux); err != nil {
+			return err
+		}
+		*f = isharesDataField(aux)
+	}
+	return nil
+}
+
 type ISharesETFData struct {
 	PortfolioID         int    `json:"portfolioId"`
 	FundName            string `json:"fundName"`
@@ -21,26 +38,16 @@ type ISharesETFData struct {
 		Display string `json:"d"`
 		Raw     int    `json:"r"`
 	} `json:"inceptionDate"`
-	Fees struct {
-		Display string  `json:"d"`
-		Raw     float64 `json:"r"`
-	} `json:"fees"`
-	NetExpenseRatio struct {
-		Display string  `json:"d"`
-		Raw     float64 `json:"r"`
-	} `json:"netr"`
-	TotalNetAssets struct {
-		Display string  `json:"d"`
-		Raw     float64 `json:"r"`
-	} `json:"totalNetAssets"`
-	NavAmount struct {
-		Display string  `json:"d"`
-		Raw     float64 `json:"r"`
-	} `json:"navAmount"`
-	ProductPageUrl    string `json:"productPageUrl"`
-	AladdinAssetClass string `json:"aladdinAssetClass"`
-	AladdinCountry    string `json:"aladdinCountry"`
-	AladdinRegion     string `json:"aladdinRegion"`
+	Fees              isharesDataField `json:"fees"`
+	NetExpenseRatio   isharesDataField `json:"netr"`
+	Ter               isharesDataField `json:"ter"`
+	TerOcf            isharesDataField `json:"ter_ocf"`
+	TotalNetAssets    isharesDataField `json:"totalNetAssets"`
+	NavAmount         isharesDataField `json:"navAmount"`
+	ProductPageUrl    string           `json:"productPageUrl"`
+	AladdinAssetClass string           `json:"aladdinAssetClass"`
+	AladdinCountry    string           `json:"aladdinCountry"`
+	AladdinRegion     string           `json:"aladdinRegion"`
 }
 
 type iSharesFundMetadata struct {
@@ -48,10 +55,8 @@ type iSharesFundMetadata struct {
 	ProductPageURL string
 }
 
-const usETFDiscoveryURL = "https://www.ishares.com/us/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/en/us-ishares/ishares-product-screener-backend-config&siteEntryPassthrough=true"
-
 func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", usETFDiscoveryURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", c.config.DiscoveryURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -71,15 +76,19 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
+	// 1. Try the Wrapper Format (US) FIRST
+	// We check for 'I' being non-empty to ensure it's actually the wrapped format
+	var wrapper struct {
+		I map[string]ISharesETFData `json:"i"`
+	}
+	if err := json.Unmarshal(body, &wrapper); err == nil && len(wrapper.I) > 0 {
+		return c.convertToFunds(wrapper.I), nil
+	}
+
+	// 2. Fallback to Direct Map Format (DE/Other)
 	var result map[string]ISharesETFData
 	if err := json.Unmarshal(body, &result); err != nil {
-		var wrapper struct {
-			I map[string]ISharesETFData `json:"i"`
-		}
-		if err2 := json.Unmarshal(body, &wrapper); err2 != nil {
-			return nil, fmt.Errorf("failed to decode JSON with either format: %w, %w", err, err2)
-		}
-		result = wrapper.I
+		return nil, fmt.Errorf("failed to decode JSON with either format: %w", err)
 	}
 
 	return c.convertToFunds(result), nil
@@ -103,13 +112,22 @@ func (c *Client) convertToFunds(etfData map[string]ISharesETFData) []etfscraper.
 }
 
 func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
+	var expenseRatio float64
+	if data.NetExpenseRatio.Raw > 0 {
+		expenseRatio = data.NetExpenseRatio.Raw / 100.0
+	} else if data.Ter.Raw > 0 {
+		expenseRatio = data.Ter.Raw / 100.0
+	} else if data.TerOcf.Raw > 0 {
+		expenseRatio = data.TerOcf.Raw / 100.0
+	}
+
 	fund := etfscraper.Fund{
 		Ticker:       data.LocalExchangeTicker,
 		Name:         data.FundName,
 		ISIN:         data.ISIN,
 		Provider:     etfscraper.ProviderIShares,
 		Currency:     etfscraper.CurrencyUSD,
-		ExpenseRatio: data.NetExpenseRatio.Raw / 100.0,
+		ExpenseRatio: expenseRatio,
 		TotalAssets:  data.TotalNetAssets.Raw,
 		Exchange:     etfscraper.ExchangeNYSE,
 	}
