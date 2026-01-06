@@ -94,15 +94,6 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 	return c.convertToFunds(result), nil
 }
 
-func (c *Client) convertToFundsFromSlice(etfData []ISharesETFData) []etfscraper.Fund {
-	var funds []etfscraper.Fund
-	for _, data := range etfData {
-		fund := c.convertSingleFund(data)
-		funds = append(funds, fund)
-	}
-	return funds
-}
-
 func (c *Client) convertToFunds(etfData map[string]ISharesETFData) []etfscraper.Fund {
 	var funds []etfscraper.Fund
 	for _, data := range etfData {
