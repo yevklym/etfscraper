@@ -3,40 +3,34 @@ package ishares
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strings"
-	"time"
 
 	"github.com/yevklym/etfscraper"
 )
 
-type HTTPClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 type Client struct {
-	httpClient HTTPClient
+	httpConfig etfscraper.HTTPConfig
 	region     string
 	config     regionConfig
 }
 
-func New(region string, client HTTPClient) (*Client, error) {
-	if client == nil {
-		client = &http.Client{
-			Timeout: time.Second * 15,
-		}
-	}
-
+func New(region string, opts ...ClientOption) (*Client, error) {
 	config, ok := regionConfigs[strings.ToLower(region)]
 	if !ok {
-		return nil, fmt.Errorf("failed to find config for region '%s'", region)
+		return nil, fmt.Errorf("unsupported region '%s'", region)
 	}
 
-	return &Client{
-		httpClient: client,
-		region:     region,
+	c := &Client{
+		httpConfig: etfscraper.DefaultHTTPConfig(),
+		region:     strings.ToLower(region),
 		config:     config,
-	}, nil
+	}
+
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	return c, nil
 }
 
 func (c *Client) DiscoverETFs(ctx context.Context) ([]etfscraper.Fund, error) {
@@ -45,14 +39,14 @@ func (c *Client) DiscoverETFs(ctx context.Context) ([]etfscraper.Fund, error) {
 
 // FundInfo retrieves detailed information about a specific fund by ticker
 func (c *Client) FundInfo(ctx context.Context, identifier string) (*etfscraper.Fund, error) {
-	url, err := c.buildFundURL(identifier)
-	if err != nil {
-		return nil, fmt.Errorf("failed to build fund URL: %w", err)
+	identifier = strings.TrimSpace(identifier)
+	if identifier == "" {
+		return nil, fmt.Errorf("identifier cannot be empty")
 	}
 
 	funds, err := c.fetchAndDecodeFunds(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch or decode funds from %s: %w", url, err)
+		return nil, fmt.Errorf("failed to fetch funds: %w", err)
 	}
 
 	for _, fund := range funds {
@@ -62,11 +56,4 @@ func (c *Client) FundInfo(ctx context.Context, identifier string) (*etfscraper.F
 	}
 
 	return nil, fmt.Errorf("fund not found with identifier: %s", identifier)
-}
-
-func (c *Client) buildFundURL(identifier string) (string, error) {
-	return fmt.Sprintf(
-		"https://www.ishares.com/us/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/en/us-ishares/ishares-product-screener-backend-config&siteEntryPassthrough=true&ticker=%s",
-		identifier,
-	), nil
 }

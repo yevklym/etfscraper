@@ -133,7 +133,7 @@ func TestFetchAndDecodeFunds(t *testing.T) {
 			ResponseBody: sampleJSON,
 			StatusCode:   http.StatusOK}
 
-		c, _ := New("us", mockClient)
+		c, _ := New("us", WithHTTPClient(mockClient))
 
 		funds, err := c.fetchAndDecodeFunds(context.Background())
 		if err != nil {
@@ -165,7 +165,7 @@ func TestFetchAndDecodeFunds(t *testing.T) {
 		mockClient := &mockHTTPClient{
 			ResponseBody: `{}`,
 			StatusCode:   http.StatusNotFound}
-		c, _ := New("us", mockClient)
+		c, _ := New("us", WithHTTPClient(mockClient))
 
 		_, err := c.fetchAndDecodeFunds(context.Background())
 
@@ -178,7 +178,7 @@ func TestFetchAndDecodeFunds(t *testing.T) {
 		mockClient := &mockHTTPClient{
 			ResponseBody: `invalid json`,
 			StatusCode:   http.StatusOK}
-		c, _ := New("us", mockClient)
+		c, _ := New("us", WithHTTPClient(mockClient))
 
 		_, err := c.fetchAndDecodeFunds(context.Background())
 

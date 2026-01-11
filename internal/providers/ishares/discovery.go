@@ -61,7 +61,7 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 		return nil, err
 	}
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.httpConfig.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}

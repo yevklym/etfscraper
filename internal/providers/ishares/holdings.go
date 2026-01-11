@@ -30,7 +30,7 @@ func (c *Client) Holdings(ctx context.Context, identifier string) (*etfscraper.H
 		return nil, err
 	}
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.httpConfig.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}

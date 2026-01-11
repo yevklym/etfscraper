@@ -11,14 +11,14 @@ import (
 )
 
 func main() {
-	provider, err := getProvider("ishares:us")
+	provider, err := getProvider("ishares:de")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// --- Example Usage of FundInfo() and Holdings() for a specific ETF ---
 	fmt.Println("--- Demonstrating specific fund lookup and holdings ---")
-	exampleTicker := "IVV" // iShares Core S&P 500 ETF
+	exampleTicker := "QDVE" // iShares S&P 500 Information Technology Sector UCITS ETF
 
 	fmt.Printf("Fetching FundInfo for %s...\n", exampleTicker)
 	specificFund, err := provider.FundInfo(context.Background(), exampleTicker)
@@ -97,7 +97,7 @@ func getProvider(providerName string) (etfscraper.Provider, error) {
 
 	switch name {
 	case "ishares":
-		return ishares.New(region, nil), nil
+		return ishares.New(region)
 	default:
 		return nil, fmt.Errorf("unknown provider: %s", name)
 	}
