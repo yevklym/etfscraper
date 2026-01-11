@@ -53,7 +53,7 @@ import (
 
 func main() {
     // 1. Initialize the provider (pass nil to use default HTTP client)
-    provider := ishares.New("us", nil)
+    provider := ishares.New("us")
 
     // 2. Get specific Fund Information
     fund, err := provider.FundInfo(context.Background(), "IVV")

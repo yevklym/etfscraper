@@ -9,16 +9,34 @@ import (
 
 type ClientOption func(*Client)
 
+const (
+	// DefaultTimeout is the default HTTP timeout (15 seconds)
+	DefaultTimeout = 15 * time.Second
+)
+
+// WithHTTPConfig sets the complete HTTP configuration.
+//
+// Example:
+//
+//	cfg := etfscraper.DefaultHTTPConfig()
+//	cfg.Timeout = 30 * time.Second
+//	client, _ := ishares.New("de", ishares.WithHTTPConfig(cfg))
 func WithHTTPConfig(cfg etfscraper.HTTPConfig) ClientOption {
 	return func(c *Client) {
 		c.httpConfig = cfg
 	}
 }
 
+// WithTimeout sets the HTTP request timeout.
+// If timeout <= 0, defaults to 15 seconds.
+//
+// Example:
+//
+//	client, _ := ishares.New("de", ishares.WithTimeout(30*time.Second))
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(c *Client) {
 		if timeout <= 0 {
-			timeout = 15 * time.Second
+			timeout = DefaultTimeout
 		}
 
 		c.httpConfig.Timeout = timeout
@@ -28,6 +46,12 @@ func WithTimeout(timeout time.Duration) ClientOption {
 	}
 }
 
+// WithHTTPClient sets a custom HTTP client implementation.
+//
+// Example:
+//
+//	customClient := &http.Client{Timeout: 60*time.Second}
+//	client, _ := ishares.New("de", ishares.WithHTTPClient(customClient))
 func WithHTTPClient(client etfscraper.HTTPClient) ClientOption {
 	return func(c *Client) {
 		if client != nil {
@@ -36,6 +60,8 @@ func WithHTTPClient(client etfscraper.HTTPClient) ClientOption {
 	}
 }
 
+// WithDebug enables debug logging of HTTP requests and responses.
+// Should only be used during development.
 func WithDebug(enabled bool) ClientOption {
 	return func(c *Client) {
 		c.httpConfig.Debug = enabled

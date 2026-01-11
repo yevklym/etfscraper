@@ -1,3 +1,23 @@
+// Package ishares provides a client for fetching iShares ETF data.
+//
+// The client supports multiple regions (US, DE) and allows configuration
+// through functional options.
+//
+// Example usage:
+//
+//	client, err := ishares.New("de")
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+//	funds, err := client.DiscoverETFs(context.Background())
+//
+// With custom configuration:
+//
+//	client, err := ishares.New("de",
+//	    ishares.WithTimeout(30*time.Second),
+//	    ishares.WithDebug(true),
+//	)
 package ishares
 
 import (
