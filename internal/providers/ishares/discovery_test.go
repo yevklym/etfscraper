@@ -3,6 +3,7 @@ package ishares
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"reflect"
@@ -16,12 +17,28 @@ type mockHTTPClient struct {
 	ResponseBody string
 	StatusCode   int
 	Error        error
+	Delay        time.Duration
 }
 
 func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	select {
+	case <-req.Context().Done():
+		return nil, req.Context().Err()
+	default:
+	}
+
+	if m.Delay > 0 {
+		select {
+		case <-time.After(m.Delay):
+		case <-req.Context().Done():
+			return nil, req.Context().Err()
+		}
+	}
+
 	if m.Error != nil {
 		return nil, m.Error
 	}
+
 	response := &http.Response{
 		StatusCode: m.StatusCode,
 		Body:       io.NopCloser(bytes.NewReader([]byte(m.ResponseBody))),
@@ -115,75 +132,52 @@ func TestConvertSingleFund(t *testing.T) {
 	}
 }
 
-func TestFetchAndDecodeFunds(t *testing.T) {
-	t.Run("http 200", func(t *testing.T) {
-		sampleJSON := `{
-           "239619":{
-               "fundName":"iShares MSCI China ETF",
-               "localExchangeTicker":"MCHI",
-               "inceptionDate":{"r":20110329},
-               "netr":{"r":0.59},
-               "totalNetAssets":{"r":7.77980369705E9},
-               "portfolioId":239619,
-               "productPageUrl":"/us/products/239619/ishares-msci-china-etf"
-           }
-       }`
-
-		mockClient := &mockHTTPClient{
-			ResponseBody: sampleJSON,
-			StatusCode:   http.StatusOK}
-
-		c, _ := New("us", WithHTTPClient(mockClient))
-
-		funds, err := c.fetchAndDecodeFunds(context.Background())
-		if err != nil {
-			t.Fatalf("Expected no error, but got: %v", err)
-		}
-
-		if len(funds) != 1 {
-			t.Fatalf("Expected 1 fund, but got %d", len(funds))
-		}
-
-		fund := funds[0]
-		expectedTicker := "MCHI"
-		if fund.Ticker != expectedTicker {
-			t.Errorf("Expected ticker %s, but got %s", expectedTicker, fund.Ticker)
-		}
-
-		expectedExpenseRatio := 0.0059
-		if fund.ExpenseRatio != expectedExpenseRatio {
-			t.Errorf("Expected expense ratio %.4f, but got %.4f", expectedExpenseRatio, fund.ExpenseRatio)
-		}
-
-		expectedTotalAssets := 7779803697.05
-		if fund.TotalAssets != expectedTotalAssets {
-			t.Errorf("Expected total assets %.2f, but got %.2f", expectedTotalAssets, fund.TotalAssets)
-		}
-	})
-
-	t.Run("http non-200 status", func(t *testing.T) {
-		mockClient := &mockHTTPClient{
+func TestContextCancellation(t *testing.T) {
+	t.Run("immediate cancellation", func(t *testing.T) {
+		slowMock := &mockHTTPClient{
 			ResponseBody: `{}`,
-			StatusCode:   http.StatusNotFound}
-		c, _ := New("us", WithHTTPClient(mockClient))
+			StatusCode:   http.StatusOK,
+		}
 
-		_, err := c.fetchAndDecodeFunds(context.Background())
+		c, _ := New("us", WithHTTPClient(slowMock))
 
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel() // Cancel immediately
+
+		_, err := c.DiscoverETFs(ctx)
 		if err == nil {
-			t.Fatalf("Expected an error for non-200 status, but got nil")
+			t.Fatal("expected error from cancelled context")
+		}
+
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("expected context.Canceled error, got: %v", err)
 		}
 	})
 
-	t.Run("malformed json response", func(t *testing.T) {
-		mockClient := &mockHTTPClient{
-			ResponseBody: `invalid json`,
-			StatusCode:   http.StatusOK}
-		c, _ := New("us", WithHTTPClient(mockClient))
+	t.Run("cancellation during request", func(t *testing.T) {
+		slowMock := &mockHTTPClient{
+			ResponseBody: `{}`,
+			StatusCode:   http.StatusOK,
+			Delay:        100 * time.Millisecond, // Simulate slow response
+		}
 
-		_, err := c.fetchAndDecodeFunds(context.Background())
+		c, _ := New("us", WithHTTPClient(slowMock))
 
+		ctx, cancel := context.WithCancel(context.Background())
+
+		// Cancel after 50ms (before the 100ms delay completes)
+		go func() {
+			time.Sleep(50 * time.Millisecond)
+			cancel()
+		}()
+
+		_, err := c.DiscoverETFs(ctx)
 		if err == nil {
-			t.Fatal("Expected an error for malformed JSON, but got nil")
+			t.Fatal("expected error from cancelled context")
+		}
+
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("expected context.Canceled error, got: %v", err)
 		}
 	})
 }

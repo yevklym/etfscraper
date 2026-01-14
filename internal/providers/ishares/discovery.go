@@ -63,6 +63,11 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 	}
 
 	resp, err := c.httpConfig.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Only defer if resp is not nil
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
 			log.Printf("Warning: failed to close response body: %v", closeErr)
