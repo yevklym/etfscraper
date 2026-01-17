@@ -35,6 +35,7 @@ type ISharesETFData struct {
 	LocalExchangeTicker string `json:"localExchangeTicker"`
 	ISIN                string `json:"isin"`
 	CUSIP               string `json:"cusip"`
+	ProductType         string `json:"productType"`
 	InceptionDate       struct {
 		Display string `json:"d"`
 		Raw     int    `json:"r"`
@@ -103,10 +104,35 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 
 func (c *Client) convertToFunds(etfData map[string]ISharesETFData) []etfscraper.Fund {
 	var funds []etfscraper.Fund
+
 	for _, data := range etfData {
+		// Skip mutual funds - only process ETFs
+		if !c.isValidETF(data) {
+			continue
+		}
+
 		funds = append(funds, c.convertSingleFund(data))
 	}
+
 	return funds
+}
+
+func (c *Client) isValidETF(data ISharesETFData) bool {
+	if data.ProductType != "ISHARES_FUND_DATA" {
+		return false
+	}
+
+	// Must have a valid ticker (not dash or empty)
+	if data.LocalExchangeTicker == "-" || data.LocalExchangeTicker == "" {
+		return false
+	}
+
+	// Must have ISIN
+	if data.ISIN == "" {
+		return false
+	}
+
+	return true
 }
 
 func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
