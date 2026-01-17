@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -69,58 +68,18 @@ func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscr
 	csvReader.FieldsPerRecord = -1
 
 	// Find and parse the "as of" date
-	var asOfDate time.Time
-	const layout = "Jan 2, 2006"
-
-	for {
-		record, err := csvReader.Read()
-		if err == io.EOF {
-			return nil, fmt.Errorf("CSV ended before date header was found")
-		}
-		if err != nil {
-			return nil, fmt.Errorf("error reading CSV header: %w", err)
-		}
-
-		if len(record) < 2 {
-			continue
-		}
-
-		if strings.Contains(record[0], "Fund Holdings as of") || strings.Contains(record[0], "as of") {
-			asOfDate, err = time.Parse(layout, record[1])
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse date %q: %w", record[1], err)
-			}
-			break
-		}
+	asOfDate, err := c.findAndParseDate(csvReader)
+	if err != nil {
+		return nil, err
 	}
 
 	// Find and parse the data header row
-	var headerRow []string
-	for {
-		record, err := csvReader.Read()
-		if err == io.EOF {
-			return nil, fmt.Errorf("CSV ended before data header was found")
-		}
-		if err != nil {
-			return nil, fmt.Errorf("error while searching for CSV header: %w", err)
-		}
-
-		if len(record) == 0 || (len(record) == 1 && record[0] == "") {
-			continue
-		}
-
-		// Detect header row by checking for known column names
-		if containsAny(record, []string{"Name", "Ticker", "Market Value", "Weight (%)", "Market Weight"}) {
-			headerRow = record
-			break
-		}
+	headerRow, err := c.findHeaderRow(csvReader)
+	if err != nil {
+		return nil, err
 	}
 
-	// Create column index map for dynamic field access
-	columnMap := make(map[string]int)
-	for i, col := range headerRow {
-		columnMap[strings.TrimSpace(col)] = i
-	}
+	resolver := newColumnResolver(headerRow, c.config.ColumnMappings)
 
 	// Parse holdings data using column map
 	var holdings []etfscraper.Holding
@@ -134,12 +93,16 @@ func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscr
 			continue
 		}
 
-		// Stop at empty rows or legal disclaimer text
-		if len(record) == 0 || record[0] == "" || isDisclaimerRow(record[0]) {
+		// Stop at empty rows
+		if len(record) == 0 || record[0] == "" {
 			break
 		}
 
-		holding, err := c.parseHoldingRecord(record, columnMap)
+		if !c.isValidHoldingRow(record, resolver) {
+			break
+		}
+
+		holding, err := c.parseHoldingRecord(record, resolver)
 		if err != nil {
 			continue
 		}
@@ -160,156 +123,128 @@ func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscr
 	}, nil
 }
 
-// isDisclaimerRow detects if a row contains legal disclaimer text
-func isDisclaimerRow(firstField string) bool {
-	disclaimerPatterns := []string{
-		"The content contained herein",
-		"The Funds are distributed by",
-		"Holdings subject to change",
-		"CAREFULLY CONSIDER THE FUNDS",
-		"Past performance does not guarantee",
-		"©20", // Copyright notices
-		"The iShares Funds are not sponsored",
+func (c *Client) isValidHoldingRow(record []string, resolver *columnResolver) bool {
+
+	// Check if we can get a name
+	name, err := resolver.getString(record, c.config.ColumnMappings.Name)
+	if err != nil || strings.TrimSpace(name) == "" {
+		return false
 	}
 
-	for _, pattern := range disclaimerPatterns {
-		if strings.Contains(firstField, pattern) {
-			return true
+	// Check if a market value is numeric
+	_, err = resolver.getFloat(record, c.config.ColumnMappings.MarketValue)
+	if err != nil {
+		return false
+	}
+
+	// Check if weight is numeric
+	_, err = resolver.getFloat(record, c.config.ColumnMappings.Weight)
+	if err != nil {
+		return false
+	}
+
+	// Disclaimer check
+	firstField := strings.TrimSpace(record[0])
+	if len(firstField) > 100 {
+		return false
+	}
+
+	disqualifiers := []string{
+		"©", "http://", "https://", "www.",
+		"The content", "This information",
+		"Holdings subject to change",
+		"carefully consider",
+	}
+
+	firstFieldLower := strings.ToLower(firstField)
+	for _, disqualifier := range disqualifiers {
+		if strings.Contains(firstFieldLower, strings.ToLower(disqualifier)) {
+			return false
 		}
 	}
 
-	return false
+	return true
 }
 
 // parseHoldingRecord extracts a Holding from a CSV record using dynamic column mapping
-func (c *Client) parseHoldingRecord(record []string, columnMap map[string]int) (etfscraper.Holding, error) {
+func (c *Client) parseHoldingRecord(record []string, resolver *columnResolver) (etfscraper.Holding, error) {
 	holding := etfscraper.Holding{}
 
-	// Extract Name (required field)
-	name, err := getStringField(record, columnMap, "Name")
+	// Extract required fields
+	name, err := resolver.getString(record, c.config.ColumnMappings.Name)
 	if err != nil {
 		return holding, fmt.Errorf("missing required field 'Name': %w", err)
 	}
 	holding.Name = name
 
-	// Extract Ticker (optional)
-	if ticker, err := getStringField(record, columnMap, "Ticker"); err == nil {
-		holding.Ticker = ticker
-	}
-
-	// Extract ISIN (optional)
-	if isin, err := getStringField(record, columnMap, "ISIN"); err == nil {
-		holding.ISIN = isin
-	}
-
-	// Extract Market Value (required)
-	marketValue, err := getFloatField(record, columnMap, "Market Value")
+	marketValue, err := resolver.getFloat(record, c.config.ColumnMappings.MarketValue)
 	if err != nil {
 		return holding, fmt.Errorf("invalid market value for %q: %w", name, err)
 	}
 	holding.MarketValue = marketValue
 
-	// Extract Weight (required)
-	weight, err := getFloatFieldWithAlternatives(record, columnMap, []string{"Weight (%)", "Market Weight", "Notional Weight"})
+	weight, err := resolver.getFloat(record, c.config.ColumnMappings.Weight)
 	if err != nil {
 		return holding, fmt.Errorf("invalid weight for %q: %w", name, err)
 	}
-	// If column is "Weight (%)", it's already in percentage; if "Market Weight", it might be too
-	// Check if value is > 1 to determine if it needs division by 100
+	// Normalize weight to 0-1 range
 	if weight > 1 {
 		holding.Weight = weight / 100.0
 	} else {
 		holding.Weight = weight
 	}
 
-	// Extract Quantity (optional - not present in all CSV formats)
-	if quantity, err := getFloatField(record, columnMap, "Quantity"); err == nil {
-		holding.Quantity = quantity
-	} else if parValue, err := getFloatField(record, columnMap, "Par Value"); err == nil {
-		// Bonds use Par Value instead of Quantity
-		holding.Quantity = parValue
-	}
-
-	// Extract Price (optional)
-	if price, err := getFloatField(record, columnMap, "Price"); err == nil {
-		holding.Price = price
-	}
-
-	// Extract Sector (optional)
-	if sector, err := getStringField(record, columnMap, "Sector"); err == nil {
-		holding.Sector = etfscraper.Sector(sector)
-	}
-
-	// Extract Asset Class (optional)
-	if assetClass, err := getStringField(record, columnMap, "Asset Class"); err == nil {
-		holding.AssetClass = etfscraper.AssetClass(assetClass)
-	}
-
-	// Extract Location (optional)
-	if location, err := getStringField(record, columnMap, "Location"); err == nil {
-		holding.Location = etfscraper.Location(location)
-	}
-
-	// Extract Exchange (optional)
-	if exchange, err := getStringField(record, columnMap, "Exchange"); err == nil {
-		holding.Exchange = etfscraper.Exchange(exchange)
-	}
-
-	// Extract Currency (optional)
-	if currency, err := getStringField(record, columnMap, "Currency"); err == nil {
-		holding.Currency = etfscraper.Currency(currency)
-	}
+	c.extractOptionalFields(&holding, record, resolver)
 
 	return holding, nil
 }
 
-// getFloatFieldWithAlternatives tries multiple column names in order
-func getFloatFieldWithAlternatives(record []string, columnMap map[string]int, fieldNames []string) (float64, error) {
-	var lastErr error
-	for _, fieldName := range fieldNames {
-		val, err := getFloatField(record, columnMap, fieldName)
-		if err == nil {
-			return val, nil
+func (c *Client) extractOptionalFields(holding *etfscraper.Holding, record []string, resolver *columnResolver) {
+	// String fields
+	stringFields := []struct {
+		mapping []string
+		setter  func(string)
+	}{
+		{c.config.ColumnMappings.Ticker, func(v string) { holding.Ticker = v }},
+		{c.config.ColumnMappings.ISIN, func(v string) { holding.ISIN = v }},
+		{c.config.ColumnMappings.Sector, func(v string) { holding.Sector = etfscraper.Sector(v) }},
+		{c.config.ColumnMappings.AssetClass, func(v string) { holding.AssetClass = etfscraper.AssetClass(v) }},
+		{c.config.ColumnMappings.Location, func(v string) { holding.Location = etfscraper.Location(v) }},
+		{c.config.ColumnMappings.Exchange, func(v string) { holding.Exchange = etfscraper.Exchange(v) }},
+		{c.config.ColumnMappings.Currency, func(v string) { holding.Currency = etfscraper.Currency(v) }},
+	}
+
+	for _, field := range stringFields {
+		if len(field.mapping) > 0 {
+			if val, err := resolver.getString(record, field.mapping); err == nil {
+				field.setter(val)
+			}
 		}
-		lastErr = err
-	}
-	return 0, fmt.Errorf("none of the alternative columns found: %w", lastErr)
-}
-
-// Helper functions for safe field extraction
-func getStringField(record []string, columnMap map[string]int, fieldName string) (string, error) {
-	idx, exists := columnMap[fieldName]
-	if !exists {
-		return "", fmt.Errorf("column %q not found", fieldName)
-	}
-	if idx >= len(record) {
-		return "", fmt.Errorf("column %q index %d out of bounds", fieldName, idx)
 	}
 
-	val := strings.TrimSpace(record[idx])
-	val = strings.Trim(val, "\"")
-	return val, nil
-}
-
-func getFloatField(record []string, columnMap map[string]int, fieldName string) (float64, error) {
-	strVal, err := getStringField(record, columnMap, fieldName)
-	if err != nil {
-		return 0, err
+	// Float fields
+	floatFields := []struct {
+		mapping []string
+		setter  func(float64)
+	}{
+		{c.config.ColumnMappings.Price, func(v float64) { holding.Price = v }},
+		{c.config.ColumnMappings.Quantity, func(v float64) { holding.Quantity = v }},
 	}
 
-	// Handle empty values
-	if strVal == "" || strVal == "-" {
-		return 0, fmt.Errorf("empty value")
+	for _, field := range floatFields {
+		if len(field.mapping) > 0 {
+			if val, err := resolver.getFloat(record, field.mapping); err == nil {
+				field.setter(val)
+			}
+		}
 	}
 
-	// Remove commas and parse
-	cleanVal := strings.ReplaceAll(strVal, ",", "")
-	floatVal, err := strconv.ParseFloat(cleanVal, 64)
-	if err != nil {
-		return 0, fmt.Errorf("parse error: %w", err)
+	// Par Value as fallback for Quantity (bonds)
+	if holding.Quantity == 0 && len(c.config.ColumnMappings.ParValue) > 0 {
+		if parValue, err := resolver.getFloat(record, c.config.ColumnMappings.ParValue); err == nil {
+			holding.Quantity = parValue
+		}
 	}
-
-	return floatVal, nil
 }
 
 func containsAny(slice []string, targets []string) bool {
@@ -321,4 +256,86 @@ func containsAny(slice []string, targets []string) bool {
 		}
 	}
 	return false
+}
+
+func (c *Client) findAndParseDate(csvReader *csv.Reader) (time.Time, error) {
+	for {
+		record, err := csvReader.Read()
+		if err == io.EOF {
+			return time.Time{}, fmt.Errorf("CSV ended before date header was found")
+		}
+		if err != nil {
+			return time.Time{}, fmt.Errorf("error reading CSV header: %w", err)
+		}
+
+		if len(record) < 2 {
+			continue
+		}
+
+		for _, pattern := range c.config.DateHeaderPatterns {
+			if strings.Contains(record[0], pattern) {
+				dateStr := strings.TrimSpace(record[1])
+
+				if c.config.MonthTranslations != nil {
+					for from, to := range c.config.MonthTranslations {
+						dateStr = strings.ReplaceAll(dateStr, from, to)
+					}
+				}
+
+				var asOfDate time.Time
+				var parseErr error
+
+				for _, format := range c.config.DateFormats {
+					asOfDate, parseErr = time.Parse(format, dateStr)
+					if parseErr == nil {
+						return asOfDate, nil
+					}
+				}
+
+				return time.Time{}, fmt.Errorf("failed to parse date %q with any of the configured formats: %w",
+					dateStr, parseErr)
+			}
+		}
+	}
+}
+
+func (c *Client) findHeaderRow(csvReader *csv.Reader) ([]string, error) {
+	expectedColumns := c.getAllExpectedColumns()
+
+	for {
+		record, err := csvReader.Read()
+		if err == io.EOF {
+			return nil, fmt.Errorf("CSV ended before data header was found")
+		}
+		if err != nil {
+			return nil, fmt.Errorf("error while searching for CSV header: %w", err)
+		}
+
+		if len(record) == 0 || (len(record) == 1 && record[0] == "") {
+			continue
+		}
+
+		if containsAny(record, expectedColumns) {
+			return record, nil
+		}
+	}
+}
+
+func (c *Client) getAllExpectedColumns() []string {
+	var columns []string
+
+	columns = append(columns, c.config.ColumnMappings.Name...)
+	columns = append(columns, c.config.ColumnMappings.Ticker...)
+	columns = append(columns, c.config.ColumnMappings.ISIN...)
+	columns = append(columns, c.config.ColumnMappings.MarketValue...)
+	columns = append(columns, c.config.ColumnMappings.Weight...)
+
+	if len(c.config.ColumnMappings.Sector) > 0 {
+		columns = append(columns, c.config.ColumnMappings.Sector...)
+	}
+	if len(c.config.ColumnMappings.Location) > 0 {
+		columns = append(columns, c.config.ColumnMappings.Location...)
+	}
+
+	return columns
 }
