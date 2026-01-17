@@ -273,7 +273,8 @@ func (c *Client) findAndParseDate(csvReader *csv.Reader) (time.Time, error) {
 		}
 
 		for _, pattern := range c.config.DateHeaderPatterns {
-			if strings.Contains(record[0], pattern) {
+			firstField := strings.TrimSpace(record[0])
+			if strings.Contains(firstField, pattern) {
 				dateStr := strings.TrimSpace(record[1])
 
 				if c.config.MonthTranslations != nil {
