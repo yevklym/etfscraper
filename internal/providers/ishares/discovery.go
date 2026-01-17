@@ -5,11 +5,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/yevklym/etfscraper"
 )
+
+type isharesDataField struct {
+	Display string  `json:"d"`
+	Raw     float64 `json:"r"`
+}
+
+func (f *isharesDataField) UnmarshalJSON(data []byte) error {
+	if len(data) > 0 && data[0] == '{' {
+		type Alias isharesDataField
+		var aux Alias
+		if err := json.Unmarshal(data, &aux); err != nil {
+			return err
+		}
+		*f = isharesDataField(aux)
+	}
+	return nil
+}
 
 type ISharesETFData struct {
 	PortfolioID         int    `json:"portfolioId"`
@@ -17,30 +35,21 @@ type ISharesETFData struct {
 	LocalExchangeTicker string `json:"localExchangeTicker"`
 	ISIN                string `json:"isin"`
 	CUSIP               string `json:"cusip"`
+	ProductType         string `json:"productType"`
 	InceptionDate       struct {
 		Display string `json:"d"`
 		Raw     int    `json:"r"`
 	} `json:"inceptionDate"`
-	Fees struct {
-		Display string  `json:"d"`
-		Raw     float64 `json:"r"`
-	} `json:"fees"`
-	NetExpenseRatio struct {
-		Display string  `json:"d"`
-		Raw     float64 `json:"r"`
-	} `json:"netr"`
-	TotalNetAssets struct {
-		Display string  `json:"d"`
-		Raw     float64 `json:"r"`
-	} `json:"totalNetAssets"`
-	NavAmount struct {
-		Display string  `json:"d"`
-		Raw     float64 `json:"r"`
-	} `json:"navAmount"`
-	ProductPageUrl    string `json:"productPageUrl"`
-	AladdinAssetClass string `json:"aladdinAssetClass"`
-	AladdinCountry    string `json:"aladdinCountry"`
-	AladdinRegion     string `json:"aladdinRegion"`
+	Fees              isharesDataField `json:"fees"`
+	NetExpenseRatio   isharesDataField `json:"netr"`
+	Ter               isharesDataField `json:"ter"`
+	TerOcf            isharesDataField `json:"ter_ocf"`
+	TotalNetAssets    isharesDataField `json:"totalNetAssets"`
+	NavAmount         isharesDataField `json:"navAmount"`
+	ProductPageUrl    string           `json:"productPageUrl"`
+	AladdinAssetClass string           `json:"aladdinAssetClass"`
+	AladdinCountry    string           `json:"aladdinCountry"`
+	AladdinRegion     string           `json:"aladdinRegion"`
 }
 
 type iSharesFundMetadata struct {
@@ -48,19 +57,23 @@ type iSharesFundMetadata struct {
 	ProductPageURL string
 }
 
-const usETFDiscoveryURL = "https://www.ishares.com/us/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/en/us-ishares/ishares-product-screener-backend-config&siteEntryPassthrough=true"
-
 func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", usETFDiscoveryURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", c.config.DiscoveryURL, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.httpConfig.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+
+	// Only defer if resp is not nil
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Printf("Warning: failed to close response body: %v", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
@@ -71,45 +84,74 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
+	// 1. Try the Wrapper Format (US) FIRST
+	// We check for 'I' being non-empty to ensure it's actually the wrapped format
+	var wrapper struct {
+		I map[string]ISharesETFData `json:"i"`
+	}
+	if err := json.Unmarshal(body, &wrapper); err == nil && len(wrapper.I) > 0 {
+		return c.convertToFunds(wrapper.I), nil
+	}
+
+	// 2. Fallback to Direct Map Format (DE/Other)
 	var result map[string]ISharesETFData
 	if err := json.Unmarshal(body, &result); err != nil {
-		var wrapper struct {
-			I map[string]ISharesETFData `json:"i"`
-		}
-		if err2 := json.Unmarshal(body, &wrapper); err2 != nil {
-			return nil, fmt.Errorf("failed to decode JSON with either format: %w, %w", err, err2)
-		}
-		result = wrapper.I
+		return nil, fmt.Errorf("failed to decode JSON with either format: %w", err)
 	}
 
 	return c.convertToFunds(result), nil
 }
 
-func (c *Client) convertToFundsFromSlice(etfData []ISharesETFData) []etfscraper.Fund {
+func (c *Client) convertToFunds(etfData map[string]ISharesETFData) []etfscraper.Fund {
 	var funds []etfscraper.Fund
+
 	for _, data := range etfData {
-		fund := c.convertSingleFund(data)
-		funds = append(funds, fund)
+		// Skip mutual funds - only process ETFs
+		if !c.isValidETF(data) {
+			continue
+		}
+
+		funds = append(funds, c.convertSingleFund(data))
 	}
+
 	return funds
 }
 
-func (c *Client) convertToFunds(etfData map[string]ISharesETFData) []etfscraper.Fund {
-	var funds []etfscraper.Fund
-	for _, data := range etfData {
-		funds = append(funds, c.convertSingleFund(data))
+func (c *Client) isValidETF(data ISharesETFData) bool {
+	if data.ProductType != "ISHARES_FUND_DATA" {
+		return false
 	}
-	return funds
+
+	// Must have a valid ticker (not dash or empty)
+	if data.LocalExchangeTicker == "-" || data.LocalExchangeTicker == "" {
+		return false
+	}
+
+	// Must have ISIN
+	if data.ISIN == "" {
+		return false
+	}
+
+	return true
 }
 
 func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
+	var expenseRatio float64
+	if data.NetExpenseRatio.Raw > 0 {
+		expenseRatio = data.NetExpenseRatio.Raw / 100.0
+	} else if data.Ter.Raw > 0 {
+		expenseRatio = data.Ter.Raw / 100.0
+	} else if data.TerOcf.Raw > 0 {
+		expenseRatio = data.TerOcf.Raw / 100.0
+	}
+
 	fund := etfscraper.Fund{
 		Ticker:       data.LocalExchangeTicker,
 		Name:         data.FundName,
 		ISIN:         data.ISIN,
 		Provider:     etfscraper.ProviderIShares,
 		Currency:     etfscraper.CurrencyUSD,
-		ExpenseRatio: data.NetExpenseRatio.Raw / 100.0,
+		ExpenseRatio: expenseRatio,
 		TotalAssets:  data.TotalNetAssets.Raw,
 		Exchange:     etfscraper.ExchangeNYSE,
 	}
