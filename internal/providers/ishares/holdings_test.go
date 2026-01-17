@@ -21,16 +21,20 @@ Other,"-"
 Ticker,Name,Type,Sector,Asset Class,Market Value,Notional Value,Quantity,Price,Location,Exchange,Currency,FX Rate,Market Currency,Accrual Date,Notional Weight,Market Weight
 "FLEX","FLEX LTD","EQUITY","Information Technology","Equity","119,376,740.56","119,376,740.56","1,989,944.00","59.99","United States","NASDAQ","USD","1.00","USD","-","1.55","1.55"
 "TLN","TALEN ENERGY CORP","EQUITY","Utilities","Equity","87,460,299.92","87,460,299.92","242,326.00","360.92","United States","NASDAQ","USD","1.00","USD","-","1.14","1.14"
-"FAZ5","S&P MID 400 EMINI DEC 25","INDEX","Cash and/or Derivatives","Futures","0.00","10,282,880.00","32.00","3,213.40","-","Index And Options Market","USD","1.00","USD","-","0.13","-"
+"FAZ5","S&P MID 400 EMINI DEC 25","INDEX","Cash and/or Derivatives","Futures","0.00","10,282,880.00","32.00","3,213.40","-","Index And Options Market","USD","1.00","USD","-","0.13","0.00"
 
 "The content contained herein..."`
 
-	c := &Client{}
+	c, err := New("us")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
 	fund := &etfscraper.Fund{Ticker: "IJJ", Name: "iShares S&P Mid-Cap 400 Value ETF"}
 
 	snapshot, err := c.parseHoldings(strings.NewReader(csvData), fund)
 	if err != nil {
-		t.Errorf("parseHoldings failed: %v", err)
+		t.Fatalf("parseHoldings failed: %v", err)
 	}
 
 	expectedDate := time.Date(2025, time.November, 14, 0, 0, 0, 0, time.UTC)
@@ -65,14 +69,18 @@ Ticker,Name,Type,Sector,Asset Class,Market Value,Notional Value,Quantity,Price,L
 func TestParseHoldings_InternationalFormat(t *testing.T) {
 	csvData := `Fund Holdings as of,"Sep 30, 2025"
 
-   Name,Market Value,Weight (%),Quantity
-   "ASML HOLDING NV","246,946,976.41","1.93","253,795.00"
-   "SAP","180,198,609.94","1.41","672,929.00"
-   "JPY/USD","-109,819.70","0.00","-2,579,800,311.00"
+Name,Market Value,Weight (%),Quantity
+"ASML HOLDING NV","246,946,976.41","1.93","253,795.00"
+"SAP","180,198,609.94","1.41","672,929.00"
+"JPY/USD","-109,819.70","0.00","-2,579,800,311.00"
 
-   "The content contained herein..."`
+"The content contained herein..."`
 
-	c := &Client{}
+	c, err := New("us")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
 	fund := &etfscraper.Fund{Ticker: "IEUR", Name: "iShares Core MSCI Europe ETF"}
 
 	snapshot, err := c.parseHoldings(strings.NewReader(csvData), fund)

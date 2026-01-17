@@ -35,18 +35,18 @@ func TestNew(t *testing.T) {
 func TestFundInfo(t *testing.T) {
 	t.Run("fund found", func(t *testing.T) {
 		sampleJSON := `{
-				"239619": {
-					"fundName": "iShares MSCI China ETF",
-					"localExchangeTicker": "MCHI",
-					"isin": "US4642874659",
-					"productType": "ISHARESFUNDDATA",
-					"inceptionDate": {"r": 20181329},
-					"fees": {"r": 0.59},
-					"totalNetAssets": {"r": 7779083697.85},
-					"portfolioId": 239619,
-					"productPageUrl": ":/us/products/239619/test"
-				}
-			}`
+        "239619": {
+            "fundName": "iShares MSCI China ETF",
+            "localExchangeTicker": "MCHI",
+            "isin": "US4642874659",
+            "productType": "ISHARES_FUND_DATA",
+            "inceptionDate": {"r": 20181329},
+            "fees": {"r": 0.59},
+            "totalNetAssets": {"r": 7779083697.85},
+            "portfolioId": 239619,
+            "productPageUrl": ":/us/products/239619/test"
+        }
+    }`
 
 		mockClient := &mockHTTPClient{
 			ResponseBody: sampleJSON,
