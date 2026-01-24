@@ -3,7 +3,7 @@
 `etfscraper` is a Go library and CLI tool designed to discover and extract detailed data from Exchange-Traded Fund (ETF)
 providers.
 
-Currently, it supports the **iShares** (US, DE provider, offering capabilities to scrape fund metadata and granular
+Currently, it supports the **iShares** (US, DE, UK provider, offering capabilities to scrape fund metadata and granular
 holdings information. Other regions and providers are planned for future releases.
 
 ## Features
