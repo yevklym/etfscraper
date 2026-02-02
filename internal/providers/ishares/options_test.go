@@ -3,6 +3,8 @@ package ishares
 import (
 	"testing"
 	"time"
+
+	"github.com/yevklym/etfscraper/internal/testutil"
 )
 
 func TestClientOptions(t *testing.T) {
@@ -44,7 +46,7 @@ func TestClientOptions(t *testing.T) {
 	})
 
 	t.Run("multiple options", func(t *testing.T) {
-		mockClient := &mockHTTPClient{StatusCode: 200}
+		mockClient := &testutil.MockHTTPClient{StatusCode: 200}
 
 		c, err := New("us",
 			WithHTTPClient(mockClient),

@@ -1,53 +1,16 @@
 package ishares
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/yevklym/etfscraper"
+	"github.com/yevklym/etfscraper/internal/testutil"
 )
-
-type mockHTTPClient struct {
-	ResponseBody string
-	StatusCode   int
-	Error        error
-	Delay        time.Duration
-}
-
-func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
-	select {
-	case <-req.Context().Done():
-		return nil, req.Context().Err()
-	default:
-	}
-
-	if m.Delay > 0 {
-		select {
-		case <-time.After(m.Delay):
-		case <-req.Context().Done():
-			return nil, req.Context().Err()
-		}
-	}
-
-	if m.Error != nil {
-		return nil, m.Error
-	}
-
-	response := &http.Response{
-		StatusCode: m.StatusCode,
-		Body:       io.NopCloser(bytes.NewReader([]byte(m.ResponseBody))),
-		Header:     make(http.Header),
-	}
-	response.Header.Set("Content-Type", "application/json")
-
-	return response, nil
-}
 
 func TestParseISharesDate(t *testing.T) {
 	t.Run("valid date", func(t *testing.T) {
@@ -86,7 +49,7 @@ func TestParseISharesDate(t *testing.T) {
 }
 
 func TestConvertSingleFund(t *testing.T) {
-	c := &Client{}
+	c := &Client{config: regionConfigs["us"]}
 
 	input := ISharesETFData{
 		PortfolioID:         12345,
@@ -134,7 +97,7 @@ func TestConvertSingleFund(t *testing.T) {
 
 func TestContextCancellation(t *testing.T) {
 	t.Run("immediate cancellation", func(t *testing.T) {
-		slowMock := &mockHTTPClient{
+		slowMock := &testutil.MockHTTPClient{
 			ResponseBody: `{}`,
 			StatusCode:   http.StatusOK,
 		}
@@ -155,7 +118,7 @@ func TestContextCancellation(t *testing.T) {
 	})
 
 	t.Run("cancellation during request", func(t *testing.T) {
-		slowMock := &mockHTTPClient{
+		slowMock := &testutil.MockHTTPClient{
 			ResponseBody: `{}`,
 			StatusCode:   http.StatusOK,
 			Delay:        100 * time.Millisecond, // Simulate slow response
