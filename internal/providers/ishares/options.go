@@ -23,9 +23,10 @@ const (
 //	client, _ := ishares.New("de", ishares.WithHTTPConfig(cfg))
 func WithHTTPConfig(cfg etfscraper.HTTPConfig) ClientOption {
 	return func(c *Client) {
-		if cfg.Client != nil {
-			c.httpConfig = cfg
+		if cfg.Client == nil {
+			cfg.Client = c.httpConfig.Client
 		}
+		c.httpConfig = cfg
 	}
 }
 

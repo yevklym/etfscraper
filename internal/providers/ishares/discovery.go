@@ -58,6 +58,9 @@ type iSharesFundMetadata struct {
 }
 
 func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, error) {
+	if c.httpConfig.Debug {
+		log.Printf("ishares: discovery request %s", c.config.DiscoveryURL)
+	}
 	req, err := http.NewRequestWithContext(ctx, "GET", c.config.DiscoveryURL, nil)
 	if err != nil {
 		return nil, err
@@ -76,6 +79,9 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 	}()
 
 	if resp.StatusCode != http.StatusOK {
+		if c.httpConfig.Debug {
+			log.Printf("ishares: discovery response %s", resp.Status)
+		}
 		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
 
@@ -150,10 +156,10 @@ func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
 		Name:         data.FundName,
 		ISIN:         data.ISIN,
 		Provider:     etfscraper.ProviderIShares,
-		Currency:     etfscraper.CurrencyUSD,
+		Currency:     c.config.DefaultCurrency,
 		ExpenseRatio: expenseRatio,
 		TotalAssets:  data.TotalNetAssets.Raw,
-		Exchange:     etfscraper.ExchangeNYSE,
+		Exchange:     c.config.DefaultExchange,
 	}
 
 	fund.ProviderMetadata = iSharesFundMetadata{
