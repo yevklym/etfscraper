@@ -37,12 +37,25 @@ type characteristics struct {
 }
 
 func (c *Client) DiscoverETFs(ctx context.Context) ([]etfscraper.Fund, error) {
-	if c.httpConfig.Debug {
-		log.Printf("amundi: discovery request %s%s", c.config.BaseURL, c.config.DiscoveryPath)
-	}
-	req, err := http.NewRequestWithContext(ctx, "POST", c.config.BaseURL+c.config.DiscoveryPath, bytes.NewReader(c.config.RequestBody))
+	requestBody, err := buildDiscoveryRequest(c.region)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to build discovery request: %w", err)
+	}
+
+	body, err := json.Marshal(requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request body: %w", err)
+	}
+
+	url := c.config.BaseURL + c.config.DiscoveryPath
+
+	if c.httpConfig.Debug {
+		log.Printf("amundi: discovery request %s (region: %s)", url, c.region)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	for k, v := range c.config.DefaultHeaders {
@@ -51,7 +64,7 @@ func (c *Client) DiscoverETFs(ctx context.Context) ([]etfscraper.Fund, error) {
 
 	resp, err := c.httpConfig.Client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("request failed: %w", err)
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
@@ -68,7 +81,11 @@ func (c *Client) DiscoverETFs(ctx context.Context) ([]etfscraper.Fund, error) {
 
 	var payload productsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if c.httpConfig.Debug {
+		log.Printf("amundi: discovered %d ETFs", len(payload.Products))
 	}
 
 	return c.convertToFunds(payload.Products), nil
