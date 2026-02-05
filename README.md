@@ -3,8 +3,8 @@
 `etfscraper` is a Go library and CLI tool designed to discover and extract detailed data from Exchange-Traded Fund (ETF)
 providers.
 
-Currently, it supports the **iShares** (US, DE, UK provider, offering capabilities to scrape fund metadata and granular
-holdings information. Other regions and providers are planned for future releases.
+Currently, it supports the **iShares** (US, DE, UK) provider with fund metadata and holdings,
+and **Amundi** (DE) for fund discovery. Other regions and providers are planned for future releases.
 
 ## Features
 
@@ -16,7 +16,7 @@ holdings information. Other regions and providers are planned for future release
     * Inception Date
 * **Deep Holdings Analysis**: Download and parse full holdings for specific funds.
     * Extracts Ticker, Name, Sector, Asset Class, Weight, and Market Value.
-* **Multi-Region Support**: Currently supports iShares US and DE regions, with extensible configuration for additional
+* **Multi-Region Support**: Currently supports iShares US/DE/UK regions, with extensible configuration for additional
   regions.
 * **Configurable HTTP Client**: Customize timeouts and HTTP client behavior.
 
@@ -58,13 +58,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/yevklym/etfscraper/internal/providers/ishares"
+	"github.com/yevklym/etfscraper/providers"
 )
 
 func main() {
 	// 1. Initialize the provider (pass nil to use default HTTP client)
 	client := &http.Client{Timeout: 30 * time.Second}
-	provider, err := ishares.New("us", ishares.WithHTTPClient(client))
+	provider, err := providers.Open("ishares:us", providers.WithHTTPClient(client))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,6 +96,7 @@ The project follows the following layout:
 * **`etfprovider.go`**: Defines the core `Provider` interface.
 * **`fund.go`, `holding.go`, `enums.go`**: Domain models representing Funds, Holdings, and financial constants (
   Currency, AssetClass, Sector, Exchange).
+* **`providers/`**: Public factory for opening providers via a spec like `ishares:uk`.
 * **`internal/providers/`**: Contains concrete implementations of the `Provider` interface.
     * **`ishares/`**:
         * `client.go`: Main entry point for the iShares provider.
