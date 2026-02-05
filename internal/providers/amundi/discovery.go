@@ -1,7 +1,6 @@
 package amundi
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -53,18 +52,9 @@ func (c *Client) DiscoverETFs(ctx context.Context) ([]etfscraper.Fund, error) {
 		log.Printf("amundi: discovery request %s (region: %s)", url, c.region)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(body))
+	resp, err := c.doPost(ctx, url, body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	for k, v := range c.config.DefaultHeaders {
-		req.Header.Set(k, v)
-	}
-
-	resp, err := c.httpConfig.Client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
+		return nil, err
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
