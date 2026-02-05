@@ -4,7 +4,7 @@
 providers.
 
 Currently, it supports the **iShares** (US, DE, UK) provider with fund metadata and holdings,
-and **Amundi** (DE) for fund discovery. Other regions and providers are planned for future releases.
+and **Amundi** (DE) with fund metadata and holdings. Other regions and providers are planned for future releases.
 
 ## Features
 
@@ -32,11 +32,70 @@ go get github.com/yevklym/etfscraper
 
 ### As a CLI Tool
 
-In development.
+Example CLI included.
 
 To run the included command-line interface directly:
 
 ## Usage
+
+## Quick Start
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/yevklym/etfscraper/providers"
+)
+
+func main() {
+	// String spec: "provider:region"
+	client, err := providers.Open("ishares:uk")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	funds, err := client.DiscoverETFs(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found %d ETFs\n", len(funds))
+}
+
+```
+
+Typed option:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/yevklym/etfscraper/providers"
+)
+
+func main() {
+	spec := providers.Spec{Name: "ishares", Region: "uk"}
+	client, err := providers.OpenSpec(spec)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	funds, err := client.DiscoverETFs(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found %d ETFs\n", len(funds))
+}
+```
 
 ### Run basic example
 
@@ -105,6 +164,23 @@ The project follows the following layout:
         * `column_resolver.go`: Flexible CSV column mapping for different regional formats.
         * `config.go`: Region-specific configurations (date formats, headers).
         * `options.go`: Client configuration options (HTTP client, timeouts).
+
+## Provider Spec
+
+Use `provider:region` to open a provider instance:
+
+- `ishares:us`
+- `ishares:de`
+- `ishares:uk`
+- `amundi:de`
+
+To list all available providers and regions at runtime:
+
+```go
+for _, spec := range providers.SupportedProviders() {
+fmt.Printf("%s: %v\n", spec.Name, spec.Regions)
+}
+```
 
 ## Testing
 
