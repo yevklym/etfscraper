@@ -13,6 +13,7 @@ type providerOptions struct {
 	httpConfig etfscraper.HTTPConfig
 }
 
+// WithHTTPConfig applies a complete HTTP configuration to provider clients.
 func WithHTTPConfig(cfg etfscraper.HTTPConfig) Option {
 	return func(o *providerOptions) {
 		if cfg.Client == nil {
@@ -22,6 +23,7 @@ func WithHTTPConfig(cfg etfscraper.HTTPConfig) Option {
 	}
 }
 
+// WithTimeout sets the HTTP request timeout for provider clients.
 func WithTimeout(timeout time.Duration) Option {
 	return func(o *providerOptions) {
 		if timeout <= 0 {
@@ -35,6 +37,7 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
+// WithHTTPClient sets a custom HTTP client for provider requests.
 func WithHTTPClient(client etfscraper.HTTPClient) Option {
 	return func(o *providerOptions) {
 		if client != nil {
@@ -43,6 +46,7 @@ func WithHTTPClient(client etfscraper.HTTPClient) Option {
 	}
 }
 
+// WithDebug enables provider debug logging.
 func WithDebug(enabled bool) Option {
 	return func(o *providerOptions) {
 		o.httpConfig.Debug = enabled

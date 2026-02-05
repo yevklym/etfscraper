@@ -15,11 +15,13 @@ type ProviderSpec struct {
 	Regions []string
 }
 
+// Spec represents a provider selection with explicit name and region.
 type Spec struct {
 	Name   string
 	Region string
 }
 
+// Open creates a provider from a "provider:region" spec string.
 func Open(spec string, opts ...Option) (etfscraper.Provider, error) {
 	name, region, err := ParseProviderSpec(spec)
 	if err != nil {
@@ -29,10 +31,12 @@ func Open(spec string, opts ...Option) (etfscraper.Provider, error) {
 	return OpenNameRegion(name, region, opts...)
 }
 
+// OpenSpec creates a provider from a Spec value.
 func OpenSpec(spec Spec, opts ...Option) (etfscraper.Provider, error) {
 	return OpenNameRegion(spec.Name, spec.Region, opts...)
 }
 
+// OpenNameRegion creates a provider from explicit name and region values.
 func OpenNameRegion(name, region string, opts ...Option) (etfscraper.Provider, error) {
 	options := providerOptions{
 		httpConfig: etfscraper.DefaultHTTPConfig(),
@@ -51,6 +55,7 @@ func OpenNameRegion(name, region string, opts ...Option) (etfscraper.Provider, e
 	}
 }
 
+// ParseProviderSpec parses a "provider:region" string into name and region.
 func ParseProviderSpec(spec string) (name string, region string, err error) {
 	trimmed := strings.TrimSpace(spec)
 	if trimmed == "" {
@@ -68,6 +73,7 @@ func ParseProviderSpec(spec string) (name string, region string, err error) {
 	return name, region, nil
 }
 
+// SupportedProviders returns all providers and their supported regions.
 func SupportedProviders() []ProviderSpec {
 	specs := []ProviderSpec{
 		{Name: "amundi", Regions: amundi.SupportedRegions()},
