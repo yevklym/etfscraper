@@ -1,9 +1,16 @@
 package amundi
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/yevklym/etfscraper/internal/testutil"
 )
 
 func TestDateValueUnmarshal_String(t *testing.T) {
@@ -129,4 +136,148 @@ func TestConvertHoldings_DerivesMarketValue(t *testing.T) {
 	if holdings[2].MarketValue != 42 {
 		t.Fatalf("expected provided market value 42, got %f", holdings[2].MarketValue)
 	}
+}
+
+func TestHoldings_EndToEnd(t *testing.T) {
+	discoveryResponse := `{
+		"products": [
+			{
+				"productId": "LU1135865084",
+				"productType": "PRODUCT",
+				"characteristics": {
+					"ISIN": "LU1135865084",
+					"SHARE_MARKETING_NAME": "Amundi Core S&P 500 Swap UCITS ETF Acc",
+					"MNEMO": "C500",
+					"TER": 0.15,
+					"CURRENCY": "EUR",
+					"FUND_AUM": 1000,
+					"ASSET_CLASS": "Equity",
+					"DISTRIBUTION_POLICY": "Capitalisation"
+				}
+			}
+		]
+	}`
+
+	holdingsResponse := `{
+		"products": [
+			{
+				"productId": "LU1135865084",
+				"productType": "PRODUCT",
+				"characteristics": {
+					"ISIN": "LU1135865084",
+					"POSITION_AS_OF_DATE": "2026-01-29",
+					"FUND_BREAKDOWNS_AS_OF_DATE": "2026-01-29"
+				},
+				"composition": {
+					"totalNumberOfInstruments": 2,
+					"compositionData": [
+						{
+							"compositionCharacteristics": {
+								"quantity": 10,
+								"bbg": "NVDA UW",
+								"name": "NVIDIA CORP",
+								"weight": 0.1,
+								"currency": "USD",
+								"type": "EQUITY_ORDINARY",
+								"sector": "Information Technology",
+								"isin": "US67066G1040",
+								"countryOfRisk": "United States"
+							},
+							"weight": 0.1
+						}
+					]
+				}
+			}
+		]
+	}`
+
+	client, err := New("de", WithHTTPClient(&sequenceHTTPClient{
+		responses: []mockResponse{
+			{status: http.StatusOK, body: discoveryResponse},
+			{status: http.StatusOK, body: holdingsResponse},
+		},
+	}))
+	if err != nil {
+		t.Fatalf("New() failed: %v", err)
+	}
+
+	snapshot, err := client.Holdings(context.Background(), "C500")
+	if err != nil {
+		t.Fatalf("Holdings failed: %v", err)
+	}
+
+	if snapshot.TotalHoldings != 1 {
+		t.Fatalf("expected 1 holding, got %d", snapshot.TotalHoldings)
+	}
+	if snapshot.AsOfDate.Format("2006-01-02") != "2026-01-29" {
+		t.Fatalf("unexpected AsOfDate: %v", snapshot.AsOfDate)
+	}
+	if snapshot.Holdings[0].MarketValue != 100 {
+		t.Fatalf("expected market value 100, got %f", snapshot.Holdings[0].MarketValue)
+	}
+}
+
+func TestHoldings_HTTPError(t *testing.T) {
+	client, err := New("de", WithHTTPClient(&sequenceHTTPClient{
+		responses: []mockResponse{
+			{status: http.StatusOK, body: `{"products":[]}`},
+			{status: http.StatusInternalServerError, body: `{"error":"boom"}`},
+		},
+	}))
+	if err != nil {
+		t.Fatalf("New() failed: %v", err)
+	}
+
+	_, err = client.Holdings(context.Background(), "UNKNOWN")
+	if err == nil {
+		t.Fatal("expected error for HTTP failure")
+	}
+}
+
+func TestFundInfo_ByISIN(t *testing.T) {
+	discoveryResponse := `{"products":[{"productId":"LU1135865084","productType":"PRODUCT","characteristics":{"ISIN":"LU1135865084","SHARE_MARKETING_NAME":"Test Fund","MNEMO":"C500","TER":0.1,"CURRENCY":"EUR","FUND_AUM":1000,"ASSET_CLASS":"Equity","DISTRIBUTION_POLICY":"Capitalisation"}}]}`
+
+	client, err := New("de", WithHTTPClient(&testutil.MockHTTPClient{
+		StatusCode:   http.StatusOK,
+		ResponseBody: discoveryResponse,
+	}))
+	if err != nil {
+		t.Fatalf("New() failed: %v", err)
+	}
+
+	fund, err := client.FundInfo(context.Background(), "LU1135865084")
+	if err != nil {
+		t.Fatalf("FundInfo failed: %v", err)
+	}
+	if fund.ISIN != "LU1135865084" {
+		t.Fatalf("unexpected ISIN %s", fund.ISIN)
+	}
+}
+
+type mockResponse struct {
+	status int
+	body   string
+	err    error
+}
+
+type sequenceHTTPClient struct {
+	responses []mockResponse
+}
+
+func (s *sequenceHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	if len(s.responses) == 0 {
+		return nil, errors.New("no mock responses available")
+	}
+	response := s.responses[0]
+	s.responses = s.responses[1:]
+
+	if response.err != nil {
+		return nil, response.err
+	}
+
+	return &http.Response{
+		StatusCode: response.status,
+		Body:       io.NopCloser(strings.NewReader(response.body)),
+		Header:     make(http.Header),
+	}, nil
 }

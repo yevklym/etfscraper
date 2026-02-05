@@ -95,6 +95,69 @@ func TestConvertSingleFund(t *testing.T) {
 	}
 }
 
+func TestDiscoverETFs_WrapperFormat(t *testing.T) {
+	sampleJSON := `{
+		"i": {
+			"239619": {
+				"fundName": "iShares MSCI China ETF",
+				"localExchangeTicker": "MCHI",
+				"isin": "US4642874659",
+				"productType": "ISHARES_FUND_DATA",
+				"totalNetAssets": {"r": 7779083697.85},
+				"netr": {"r": 0.59},
+				"portfolioId": 239619,
+				"productPageUrl": ":/us/products/239619/test"
+			}
+		}
+	}`
+
+	mockClient := &testutil.MockHTTPClient{
+		ResponseBody: sampleJSON,
+		StatusCode:   http.StatusOK,
+	}
+
+	c, _ := New("us", WithHTTPClient(mockClient))
+
+	funds, err := c.DiscoverETFs(context.Background())
+	if err != nil {
+		t.Fatalf("DiscoverETFs failed: %v", err)
+	}
+	if len(funds) != 1 {
+		t.Fatalf("expected 1 fund, got %d", len(funds))
+	}
+	if funds[0].Ticker != "MCHI" {
+		t.Fatalf("expected ticker MCHI, got %q", funds[0].Ticker)
+	}
+}
+
+func TestConvertSingleFund_RegionDefaults(t *testing.T) {
+	input := ISharesETFData{
+		PortfolioID:         12345,
+		FundName:            "Test Fund",
+		LocalExchangeTicker: "TEST",
+		ISIN:                "DE1234567890",
+		ProductType:         "ISHARES_FUND_DATA",
+	}
+
+	deClient := &Client{config: regionConfigs["de"]}
+	deFund := deClient.convertSingleFund(input)
+	if deFund.Currency != etfscraper.CurrencyEUR {
+		t.Fatalf("expected EUR currency, got %q", deFund.Currency)
+	}
+	if deFund.Exchange != etfscraper.ExchangeXetra {
+		t.Fatalf("expected Xetra exchange, got %q", deFund.Exchange)
+	}
+
+	ukClient := &Client{config: regionConfigs["uk"]}
+	ukFund := ukClient.convertSingleFund(input)
+	if ukFund.Currency != etfscraper.CurrencyGBP {
+		t.Fatalf("expected GBP currency, got %q", ukFund.Currency)
+	}
+	if ukFund.Exchange != etfscraper.ExchangeLSE {
+		t.Fatalf("expected LSE exchange, got %q", ukFund.Exchange)
+	}
+}
+
 func TestContextCancellation(t *testing.T) {
 	t.Run("immediate cancellation", func(t *testing.T) {
 		slowMock := &testutil.MockHTTPClient{
