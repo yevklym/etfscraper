@@ -8,6 +8,7 @@ import (
 type regionConfig struct {
 	BaseURL        string
 	DiscoveryPath  string
+	HoldingsPath   string
 	CountryCode    string
 	CountryName    string
 	LanguageCode   string
@@ -19,6 +20,7 @@ var regionConfigs = map[string]regionConfig{
 	"de": {
 		BaseURL:       "https://www.amundietf.de",
 		DiscoveryPath: "/mapi/ProductAPI/getProductsData",
+		HoldingsPath:  "/mapi/ProductAPI/getProductsData",
 		CountryCode:   "DEU",
 		CountryName:   "Germany",
 		LanguageCode:  "en",

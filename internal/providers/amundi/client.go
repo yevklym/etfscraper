@@ -52,7 +52,3 @@ func (c *Client) FundInfo(ctx context.Context, identifier string) (*etfscraper.F
 
 	return nil, fmt.Errorf("fund not found with identifier: %s", identifier)
 }
-
-func (c *Client) Holdings(_ context.Context, _ string) (*etfscraper.HoldingsSnapshot, error) {
-	return nil, fmt.Errorf("%w: amundi", etfscraper.ErrHoldingsUnavailable)
-}
