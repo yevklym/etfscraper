@@ -1,53 +1,16 @@
 package ishares
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/yevklym/etfscraper"
+	"github.com/yevklym/etfscraper/internal/testutil"
 )
-
-type mockHTTPClient struct {
-	ResponseBody string
-	StatusCode   int
-	Error        error
-	Delay        time.Duration
-}
-
-func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
-	select {
-	case <-req.Context().Done():
-		return nil, req.Context().Err()
-	default:
-	}
-
-	if m.Delay > 0 {
-		select {
-		case <-time.After(m.Delay):
-		case <-req.Context().Done():
-			return nil, req.Context().Err()
-		}
-	}
-
-	if m.Error != nil {
-		return nil, m.Error
-	}
-
-	response := &http.Response{
-		StatusCode: m.StatusCode,
-		Body:       io.NopCloser(bytes.NewReader([]byte(m.ResponseBody))),
-		Header:     make(http.Header),
-	}
-	response.Header.Set("Content-Type", "application/json")
-
-	return response, nil
-}
 
 func TestParseISharesDate(t *testing.T) {
 	t.Run("valid date", func(t *testing.T) {
@@ -86,7 +49,7 @@ func TestParseISharesDate(t *testing.T) {
 }
 
 func TestConvertSingleFund(t *testing.T) {
-	c := &Client{}
+	c := &Client{config: regionConfigs["us"]}
 
 	input := ISharesETFData{
 		PortfolioID:         12345,
@@ -132,9 +95,72 @@ func TestConvertSingleFund(t *testing.T) {
 	}
 }
 
+func TestDiscoverETFs_WrapperFormat(t *testing.T) {
+	sampleJSON := `{
+		"i": {
+			"239619": {
+				"fundName": "iShares MSCI China ETF",
+				"localExchangeTicker": "MCHI",
+				"isin": "US4642874659",
+				"productType": "ISHARES_FUND_DATA",
+				"totalNetAssets": {"r": 7779083697.85},
+				"netr": {"r": 0.59},
+				"portfolioId": 239619,
+				"productPageUrl": ":/us/products/239619/test"
+			}
+		}
+	}`
+
+	mockClient := &testutil.MockHTTPClient{
+		ResponseBody: sampleJSON,
+		StatusCode:   http.StatusOK,
+	}
+
+	c, _ := New("us", WithHTTPClient(mockClient))
+
+	funds, err := c.DiscoverETFs(context.Background())
+	if err != nil {
+		t.Fatalf("DiscoverETFs failed: %v", err)
+	}
+	if len(funds) != 1 {
+		t.Fatalf("expected 1 fund, got %d", len(funds))
+	}
+	if funds[0].Ticker != "MCHI" {
+		t.Fatalf("expected ticker MCHI, got %q", funds[0].Ticker)
+	}
+}
+
+func TestConvertSingleFund_RegionDefaults(t *testing.T) {
+	input := ISharesETFData{
+		PortfolioID:         12345,
+		FundName:            "Test Fund",
+		LocalExchangeTicker: "TEST",
+		ISIN:                "DE1234567890",
+		ProductType:         "ISHARES_FUND_DATA",
+	}
+
+	deClient := &Client{config: regionConfigs["de"]}
+	deFund := deClient.convertSingleFund(input)
+	if deFund.Currency != etfscraper.CurrencyEUR {
+		t.Fatalf("expected EUR currency, got %q", deFund.Currency)
+	}
+	if deFund.Exchange != etfscraper.ExchangeXetra {
+		t.Fatalf("expected Xetra exchange, got %q", deFund.Exchange)
+	}
+
+	ukClient := &Client{config: regionConfigs["uk"]}
+	ukFund := ukClient.convertSingleFund(input)
+	if ukFund.Currency != etfscraper.CurrencyGBP {
+		t.Fatalf("expected GBP currency, got %q", ukFund.Currency)
+	}
+	if ukFund.Exchange != etfscraper.ExchangeLSE {
+		t.Fatalf("expected LSE exchange, got %q", ukFund.Exchange)
+	}
+}
+
 func TestContextCancellation(t *testing.T) {
 	t.Run("immediate cancellation", func(t *testing.T) {
-		slowMock := &mockHTTPClient{
+		slowMock := &testutil.MockHTTPClient{
 			ResponseBody: `{}`,
 			StatusCode:   http.StatusOK,
 		}
@@ -155,7 +181,7 @@ func TestContextCancellation(t *testing.T) {
 	})
 
 	t.Run("cancellation during request", func(t *testing.T) {
-		slowMock := &mockHTTPClient{
+		slowMock := &testutil.MockHTTPClient{
 			ResponseBody: `{}`,
 			StatusCode:   http.StatusOK,
 			Delay:        100 * time.Millisecond, // Simulate slow response

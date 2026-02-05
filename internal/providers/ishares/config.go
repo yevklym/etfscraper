@@ -1,9 +1,17 @@
 package ishares
 
+import (
+	"sort"
+
+	"github.com/yevklym/etfscraper"
+)
+
 type regionConfig struct {
 	DiscoveryURL        string
 	BaseURL             string
 	HoldingsURLTemplate string
+	DefaultCurrency     etfscraper.Currency
+	DefaultExchange     etfscraper.Exchange
 	ColumnMappings      ColumnMapper
 	MonthTranslations   map[string]string
 	DateFormats         []string
@@ -34,6 +42,8 @@ var regionConfigs = map[string]regionConfig{
 		DiscoveryURL:        "https://www.ishares.com/us/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/en/us-ishares/ishares-product-screener-backend-config&siteEntryPassthrough=true",
 		BaseURL:             "https://www.ishares.com",
 		HoldingsURLTemplate: "%s%s/1467271812596.ajax?fileType=csv",
+		DefaultCurrency:     etfscraper.CurrencyUSD,
+		DefaultExchange:     etfscraper.ExchangeNYSE,
 		MonthTranslations:   nil,
 		DateFormats:         []string{"Jan 2, 2006"},
 		DateHeaderPatterns:  []string{"Fund Holdings as of"},
@@ -59,6 +69,8 @@ var regionConfigs = map[string]regionConfig{
 		DiscoveryURL:        "https://www.ishares.com/de/privatanleger/de/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/de/germany/product-screener/ishares-product-screener-backend-config&siteEntryPassthrough=true",
 		BaseURL:             "https://www.ishares.com",
 		HoldingsURLTemplate: "%s%s/fund/1478358465952.ajax?fileType=csv",
+		DefaultCurrency:     etfscraper.CurrencyEUR,
+		DefaultExchange:     etfscraper.ExchangeXetra,
 		MonthTranslations: map[string]string{
 			"Jan": "Jan",
 			"Feb": "Feb",
@@ -96,6 +108,8 @@ var regionConfigs = map[string]regionConfig{
 		DiscoveryURL:        "https://www.ishares.com/uk/individual/en/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/en/uk/product-screener/ishares-product-screener-backend-config&siteEntryPassthrough=true",
 		BaseURL:             "https://www.ishares.com",
 		HoldingsURLTemplate: "%s%s/fund/1506575576011.ajax?fileType=csv",
+		DefaultCurrency:     etfscraper.CurrencyGBP,
+		DefaultExchange:     etfscraper.ExchangeLSE,
 		MonthTranslations:   nil,
 		DateFormats:         []string{"02/Jan/2006"},
 		DateHeaderPatterns:  []string{"Fund Holdings as of"},
@@ -117,4 +131,14 @@ var regionConfigs = map[string]regionConfig{
 			Type:          []string{"Type"},
 		},
 	},
+}
+
+func SupportedRegions() []string {
+	regions := make([]string, 0, len(regionConfigs))
+	for region := range regionConfigs {
+		regions = append(regions, region)
+	}
+
+	sort.Strings(regions)
+	return regions
 }

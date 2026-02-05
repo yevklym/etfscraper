@@ -1,4 +1,4 @@
-package ishares
+package amundi
 
 import (
 	"net/http"
@@ -20,7 +20,7 @@ const (
 //
 //	cfg := etfscraper.DefaultHTTPConfig()
 //	cfg.Timeout = 30 * time.Second
-//	client, _ := ishares.New("de", ishares.WithHTTPConfig(cfg))
+//	client, _ := amundi.New("de", amundi.WithHTTPConfig(cfg))
 func WithHTTPConfig(cfg etfscraper.HTTPConfig) ClientOption {
 	return func(c *Client) {
 		if cfg.Client == nil {
@@ -35,7 +35,7 @@ func WithHTTPConfig(cfg etfscraper.HTTPConfig) ClientOption {
 //
 // Example:
 //
-//	client, _ := ishares.New("de", ishares.WithTimeout(30*time.Second))
+//	client, _ := amundi.New("de", amundi.WithTimeout(30*time.Second))
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(c *Client) {
 		if timeout <= 0 {
@@ -54,7 +54,7 @@ func WithTimeout(timeout time.Duration) ClientOption {
 // Example:
 //
 //	customClient := &http.Client{Timeout: 60*time.Second}
-//	client, _ := ishares.New("de", ishares.WithHTTPClient(customClient))
+//	client, _ := amundi.New("de", amundi.WithHTTPClient(customClient))
 func WithHTTPClient(client etfscraper.HTTPClient) ClientOption {
 	return func(c *Client) {
 		if client != nil {

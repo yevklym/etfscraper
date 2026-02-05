@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/yevklym/etfscraper/internal/testutil"
 )
 
 func TestNew(t *testing.T) {
@@ -48,7 +50,7 @@ func TestFundInfo(t *testing.T) {
         }
     }`
 
-		mockClient := &mockHTTPClient{
+		mockClient := &testutil.MockHTTPClient{
 			ResponseBody: sampleJSON,
 			StatusCode:   http.StatusOK,
 		}
@@ -68,7 +70,7 @@ func TestFundInfo(t *testing.T) {
 	t.Run("fund not found", func(t *testing.T) {
 		sampleJSON := `{"239619": {"localExchangeTicker": "MCHI"}}`
 
-		mockClient := &mockHTTPClient{
+		mockClient := &testutil.MockHTTPClient{
 			ResponseBody: sampleJSON,
 			StatusCode:   http.StatusOK,
 		}

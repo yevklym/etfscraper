@@ -4,21 +4,19 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
-	"github.com/yevklym/etfscraper"
-	"github.com/yevklym/etfscraper/internal/providers/ishares"
+	"github.com/yevklym/etfscraper/providers"
 )
 
 func main() {
-	provider, err := getProvider("ishares:de")
+	provider, err := providers.Open("ishares:uk")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// --- Example Usage of FundInfo() and Holdings() for a specific ETF ---
 	fmt.Println("--- Demonstrating specific fund lookup and holdings ---")
-	exampleTicker := "QDVE" // iShares S&P 500 Information Technology Sector UCITS ETF
+	exampleTicker := "GSPX" // iShares S&P 500 Information Technology Sector UCITS ETF
 
 	fmt.Printf("Fetching FundInfo for %s...\n", exampleTicker)
 	specificFund, err := provider.FundInfo(context.Background(), exampleTicker)
@@ -60,7 +58,7 @@ func main() {
 	fmt.Printf("Successfully discovered %d ETFs!\n\n", len(funds))
 
 	// Show first 5 ETFs
-	for i, fund := range funds[:min(5, len(funds))] {
+	for i, fund := range funds[:min(50, len(funds))] {
 		fmt.Printf("%d. %s (%s)\n", i+1, fund.Name, fund.Ticker)
 		fmt.Printf("   ISIN: %s\n", fund.ISIN)
 		fmt.Printf("   Expense Ratio: %.2f%%\n", fund.ExpenseRatio*100)
@@ -84,22 +82,6 @@ func main() {
 			fmt.Printf("%d. %s (%.2f%%) - $%.2f\n", j+1, holding.Name, holding.Weight*100, holding.MarketValue)
 		}
 		fmt.Println()
-	}
-}
-
-func getProvider(providerName string) (etfscraper.Provider, error) {
-	parts := strings.SplitN(providerName, ":", 2)
-	name := parts[0]
-	region := ""
-	if len(parts) > 1 {
-		region = parts[1]
-	}
-
-	switch name {
-	case "ishares":
-		return ishares.New(region)
-	default:
-		return nil, fmt.Errorf("unknown provider: %s", name)
 	}
 }
 

@@ -50,6 +50,7 @@ const (
 	ExchangeBATS     Exchange = "BATS"     // BATS Global Markets
 	ExchangeLSE      Exchange = "LSE"      // London Stock Exchange
 	ExchangeEuronext Exchange = "Euronext" // Euronext
+	ExchangeXetra    Exchange = "Xetra"    // Xetra
 	ExchangeTSE      Exchange = "TSE"      // Tokyo Stock Exchange
 	ExchangeHKEX     Exchange = "HKEX"     // Hong Kong Exchange
 	ExchangeSSE      Exchange = "SSE"      // Shanghai Stock Exchange
@@ -100,4 +101,5 @@ const (
 
 const (
 	ProviderIShares ProviderName = "iShares"
+	ProviderAmundi  ProviderName = "Amundi"
 )

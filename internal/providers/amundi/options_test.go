@@ -1,4 +1,4 @@
-package ishares
+package amundi
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 
 func TestClientOptions(t *testing.T) {
 	t.Run("default configuration", func(t *testing.T) {
-		c, err := New("us")
+		c, err := New("de")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -24,7 +24,7 @@ func TestClientOptions(t *testing.T) {
 	})
 
 	t.Run("WithTimeout option", func(t *testing.T) {
-		c, err := New("us", WithTimeout(30*time.Second))
+		c, err := New("de", WithTimeout(30*time.Second))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -35,7 +35,7 @@ func TestClientOptions(t *testing.T) {
 	})
 
 	t.Run("WithDebug option", func(t *testing.T) {
-		c, err := New("us", WithDebug(true))
+		c, err := New("de", WithDebug(true))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -48,7 +48,7 @@ func TestClientOptions(t *testing.T) {
 	t.Run("multiple options", func(t *testing.T) {
 		mockClient := &testutil.MockHTTPClient{StatusCode: 200}
 
-		c, err := New("us",
+		c, err := New("de",
 			WithHTTPClient(mockClient),
 			WithTimeout(45*time.Second),
 			WithDebug(true),
