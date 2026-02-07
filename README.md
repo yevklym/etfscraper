@@ -1,7 +1,6 @@
 # ETF Scraper
 
-`etfscraper` is a Go library and CLI tool designed to discover and extract detailed data from Exchange-Traded Fund (ETF)
-providers.
+`etfscraper` is a Go library designed to discover and extract detailed data from Exchange-Traded Fund (ETF) providers.
 
 Currently, it supports the **iShares** (US, DE, UK) provider with fund metadata and holdings,
 and **Amundi** (DE) with fund metadata and holdings. Other regions and providers are planned for future releases.
@@ -21,24 +20,15 @@ and **Amundi** (DE) with fund metadata and holdings. Other regions and providers
 * **Configurable HTTP Client**: Customize timeouts and HTTP client behavior.
 
 ## Installation
-
-### As a Library
-
 To use `etfscraper` in your own Go project:
 
 ```bash
 go get github.com/yevklym/etfscraper
 ```
 
-### As a CLI Tool
-
-Example CLI included.
-
-To run the included command-line interface directly:
-
 ## Usage
 
-## Quick Start
+### Quick Start
 
 ```go
 package main
@@ -97,13 +87,6 @@ func main() {
 }
 ```
 
-### Run basic example
-
-```bash
-git clone https://github.com/yevklym/etfscraper.git
-cd etfscraper
-go run cmd/cli/main.go
-```
 
 ### Library Example
 
@@ -157,13 +140,14 @@ The project follows the following layout:
   Currency, AssetClass, Sector, Exchange).
 * **`providers/`**: Public factory for opening providers via a spec like `ishares:uk`.
 * **`internal/providers/`**: Contains concrete implementations of the `Provider` interface.
-    * **`ishares/`**:
+    * **`ishares/`**: iShares provider implementation.
         * `client.go`: Main entry point for the iShares provider.
         * `discovery.go`: Handles fetching the list of all ETFs.
         * `holdings.go`: Handles downloading and parsing CSV holdings files.
         * `column_resolver.go`: Flexible CSV column mapping for different regional formats.
         * `config.go`: Region-specific configurations (date formats, headers).
         * `options.go`: Client configuration options (HTTP client, timeouts).
+    * **`amundi/`**: Amundi provider implementation with similar structure.
 
 ## Provider Spec
 
