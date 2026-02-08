@@ -31,6 +31,6 @@ type Fund struct {
 	Exchange Exchange `json:"exchange,omitempty"`
 
 	// Additional metadata
-	LastUpdated      time.Time   `json:"lastUpdated,omitempty"`
-	ProviderMetadata interface{} `json:"-"`
+	LastUpdated      time.Time `json:"lastUpdated,omitempty"`
+	ProviderMetadata any       `json:"-"`
 }

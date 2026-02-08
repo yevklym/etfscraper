@@ -35,13 +35,13 @@ var regionConfigs = map[string]regionConfig{
 }
 
 // buildDiscoveryRequest creates a discovery request for a specific region
-func buildDiscoveryRequest(region string) (map[string]interface{}, error) {
+func buildDiscoveryRequest(region string) (map[string]any, error) {
 	cfg, ok := regionConfigs[region]
 	if !ok {
 		return nil, fmt.Errorf("unsupported region: %s (supported: %v)", region, SupportedRegions())
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"context": map[string]string{
 			"countryCode":     cfg.CountryCode,
 			"countryName":     cfg.CountryName,
@@ -93,19 +93,19 @@ func buildDiscoveryRequest(region string) (map[string]interface{}, error) {
 			{"indicator": "shareCumulativePerformance", "period": "ONE_YEAR"},
 			{"indicator": "shareCumulativePerformance", "period": "THREE_YEARS"},
 		},
-		"filters":       []interface{}{},
-		"sortCriterias": []interface{}{},
-		"historics":     []interface{}{},
+		"filters":       []any{},
+		"sortCriterias": []any{},
+		"historics":     []any{},
 	}, nil
 }
 
-func buildHoldingsRequest(region, isin string) (map[string]interface{}, error) {
+func buildHoldingsRequest(region, isin string) (map[string]any, error) {
 	cfg, ok := regionConfigs[region]
 	if !ok {
 		return nil, fmt.Errorf("unsupported region: %s (supported: %v)", region, SupportedRegions())
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"context": map[string]string{
 			"countryCode":     cfg.CountryCode,
 			"countryName":     cfg.CountryName,
@@ -122,10 +122,10 @@ func buildHoldingsRequest(region, isin string) (map[string]interface{}, error) {
 			"POSITION_AS_OF_DATE",
 			"FUND_BREAKDOWNS_AS_OF_DATE",
 		},
-		"breakDown": map[string]interface{}{
+		"breakDown": map[string]any{
 			"aggregationFields": []string{"FUND_TOP10"},
 		},
-		"composition": map[string]interface{}{
+		"composition": map[string]any{
 			"compositionFields": []string{
 				"name",
 				"isin",
@@ -139,7 +139,7 @@ func buildHoldingsRequest(region, isin string) (map[string]interface{}, error) {
 			},
 		},
 		"productType": "PRODUCT",
-		"historics":   []interface{}{},
+		"historics":   []any{},
 	}, nil
 }
 
