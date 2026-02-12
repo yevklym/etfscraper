@@ -46,6 +46,20 @@ var regionConfigs = map[string]regionConfig{
 			"Referer":      "https://www.amundietf.co.uk/",
 		},
 	},
+	"fr": {
+		BaseURL:       "https://www.amundietf.fr",
+		DiscoveryPath: "/mapi/ProductAPI/getProductsData",
+		HoldingsPath:  "/mapi/ProductAPI/getProductsData",
+		CountryCode:   "FRA",
+		LanguageCode:  "en",
+		LanguageName:  "English",
+		DefaultHeaders: map[string]string{
+			"Content-Type": "application/json",
+			"Accept":       "application/json, text/plain, */*",
+			"Origin":       "https://www.amundietf.fr",
+			"Referer":      "https://www.amundietf.fr/",
+		},
+	},
 }
 
 // buildDiscoveryRequest creates a discovery request for a specific region
