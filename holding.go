@@ -24,7 +24,7 @@ type Holding struct {
 	Exchange   Exchange   `json:"exchange,omitempty"`
 
 	// Timestamps
-	LastUpdated time.Time `json:"lastUpdated,omitempty"`
+	LastUpdated time.Time `json:"lastUpdated,omitzero"`
 }
 
 // HoldingsSnapshot represents a point-in-time snapshot of fund holdings
@@ -40,5 +40,5 @@ type HoldingsSnapshot struct {
 	CashWeight  float64 `json:"cashWeight,omitempty"`
 
 	// Metadata
-	LastUpdated time.Time `json:"lastUpdated,omitempty"`
+	LastUpdated time.Time `json:"lastUpdated,omitzero"`
 }
