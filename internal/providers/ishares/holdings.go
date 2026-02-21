@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -249,10 +250,8 @@ func (c *Client) extractOptionalFields(holding *etfscraper.Holding, record []str
 
 func containsAny(slice []string, targets []string) bool {
 	for _, item := range slice {
-		for _, target := range targets {
-			if strings.TrimSpace(item) == target {
-				return true
-			}
+		if slices.Contains(targets, strings.TrimSpace(item)) {
+			return true
 		}
 	}
 	return false
