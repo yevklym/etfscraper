@@ -40,16 +40,18 @@ type ISharesETFData struct {
 		Display string `json:"d"`
 		Raw     int    `json:"r"`
 	} `json:"inceptionDate"`
-	Fees              isharesDataField `json:"fees"`
-	NetExpenseRatio   isharesDataField `json:"netr"`
-	Ter               isharesDataField `json:"ter"`
-	TerOcf            isharesDataField `json:"ter_ocf"`
-	TotalNetAssets    isharesDataField `json:"totalNetAssets"`
-	NavAmount         isharesDataField `json:"navAmount"`
-	ProductPageUrl    string           `json:"productPageUrl"`
-	AladdinAssetClass string           `json:"aladdinAssetClass"`
-	AladdinCountry    string           `json:"aladdinCountry"`
-	AladdinRegion     string           `json:"aladdinRegion"`
+	Fees               isharesDataField `json:"fees"`
+	NetExpenseRatio    isharesDataField `json:"netr"`
+	Ter                isharesDataField `json:"ter"`
+	TerOcf             isharesDataField `json:"ter_ocf"`
+	TotalNetAssets     isharesDataField `json:"totalNetAssets"`
+	NavAmount          isharesDataField `json:"navAmount"`
+	ProductPageUrl     string           `json:"productPageUrl"`
+	AladdinAssetClass  string           `json:"aladdinAssetClass"`
+	AladdinCountry     string           `json:"aladdinCountry"`
+	AladdinRegion      string           `json:"aladdinRegion"`
+	SeriesBaseCurrency string           `json:"seriesBaseCurrency"`
+	Exchange           string           `json:"exchange"`
 }
 
 type iSharesFundMetadata struct {
@@ -151,15 +153,25 @@ func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
 		expenseRatio = data.TerOcf.Raw / 100.0
 	}
 
+	currency := c.config.DefaultCurrency
+	if normalized := normalizeCurrency(data.SeriesBaseCurrency); normalized != "" {
+		currency = normalized
+	}
+
+	exchange := c.config.DefaultExchange
+	if normalized := normalizeExchange(data.Exchange); normalized != "" {
+		exchange = normalized
+	}
+
 	fund := etfscraper.Fund{
 		Ticker:       data.LocalExchangeTicker,
 		Name:         data.FundName,
 		ISIN:         data.ISIN,
 		Provider:     etfscraper.ProviderIShares,
-		Currency:     c.config.DefaultCurrency,
+		Currency:     currency,
 		ExpenseRatio: expenseRatio,
 		TotalAssets:  data.TotalNetAssets.Raw,
-		Exchange:     c.config.DefaultExchange,
+		Exchange:     exchange,
 	}
 
 	fund.ProviderMetadata = iSharesFundMetadata{

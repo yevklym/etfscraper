@@ -19,7 +19,7 @@ Cash,"-"
 Other,"-"
 
 Ticker,Name,Type,Sector,Asset Class,Market Value,Notional Value,Quantity,Price,Location,Exchange,Currency,FX Rate,Market Currency,Accrual Date,Notional Weight,Market Weight
-"FLEX","FLEX LTD","EQUITY","Information Technology","Equity","119,376,740.56","119,376,740.56","1,989,944.00","59.99","United States","NASDAQ","USD","1.00","USD","-","1.55","1.55"
+"FLEX","FLEX LTD","EQUITY","Information Technology","Equity","119,376,740.56","119,376,740.56","1,989,944.00","59.99","United States","NASDAQ","USD","1.00","EUR","-","1.55","1.55"
 "TLN","TALEN ENERGY CORP","EQUITY","Utilities","Equity","87,460,299.92","87,460,299.92","242,326.00","360.92","United States","NASDAQ","USD","1.00","USD","-","1.14","1.14"
 "FAZ5","S&P MID 400 EMINI DEC 25","INDEX","Cash and/or Derivatives","Futures","0.00","10,282,880.00","32.00","3,213.40","-","Index And Options Market","USD","1.00","USD","-","0.13","0.00"
 
@@ -55,6 +55,9 @@ Ticker,Name,Type,Sector,Asset Class,Market Value,Notional Value,Quantity,Price,L
 	}
 	if flex.Weight != 0.0155 {
 		t.Errorf("Expected weight 0.0155, got %f", flex.Weight)
+	}
+	if flex.Currency != etfscraper.CurrencyEUR {
+		t.Errorf("Expected currency EUR, got %s", flex.Currency)
 	}
 
 	faz := snapshot.Holdings[2]

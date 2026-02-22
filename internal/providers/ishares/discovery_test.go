@@ -158,6 +158,28 @@ func TestConvertSingleFund_RegionDefaults(t *testing.T) {
 	}
 }
 
+func TestConvertSingleFund_OverridesCurrencyAndExchange(t *testing.T) {
+	c := &Client{config: regionConfigs["us"]}
+
+	input := ISharesETFData{
+		PortfolioID:         98765,
+		FundName:            "Override Fund",
+		LocalExchangeTicker: "OVRD",
+		ISIN:                "US0000000001",
+		ProductType:         "ISHARES_FUND_DATA",
+		SeriesBaseCurrency:  "EUR",
+		Exchange:            "Xetra",
+	}
+
+	fund := c.convertSingleFund(input)
+	if fund.Currency != etfscraper.CurrencyEUR {
+		t.Fatalf("expected EUR currency, got %q", fund.Currency)
+	}
+	if fund.Exchange != etfscraper.ExchangeXetra {
+		t.Fatalf("expected Xetra exchange, got %q", fund.Exchange)
+	}
+}
+
 func TestContextCancellation(t *testing.T) {
 	t.Run("immediate cancellation", func(t *testing.T) {
 		slowMock := &testutil.MockHTTPClient{

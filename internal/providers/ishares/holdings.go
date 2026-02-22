@@ -211,8 +211,7 @@ func (c *Client) extractOptionalFields(holding *etfscraper.Holding, record []str
 		{c.config.ColumnMappings.Sector, func(v string) { holding.Sector = etfscraper.Sector(v) }},
 		{c.config.ColumnMappings.AssetClass, func(v string) { holding.AssetClass = etfscraper.AssetClass(v) }},
 		{c.config.ColumnMappings.Location, func(v string) { holding.Location = etfscraper.Location(v) }},
-		{c.config.ColumnMappings.Exchange, func(v string) { holding.Exchange = etfscraper.Exchange(v) }},
-		{c.config.ColumnMappings.Currency, func(v string) { holding.Currency = etfscraper.Currency(v) }},
+		{c.config.ColumnMappings.Exchange, func(v string) { holding.Exchange = normalizeExchange(v) }},
 	}
 
 	for _, field := range stringFields {
@@ -221,6 +220,10 @@ func (c *Client) extractOptionalFields(holding *etfscraper.Holding, record []str
 				field.setter(val)
 			}
 		}
+	}
+
+	if currency := c.resolveHoldingCurrency(record, resolver); currency != "" {
+		holding.Currency = currency
 	}
 
 	// Float fields
@@ -246,6 +249,25 @@ func (c *Client) extractOptionalFields(holding *etfscraper.Holding, record []str
 			holding.Quantity = parValue
 		}
 	}
+}
+
+func (c *Client) resolveHoldingCurrency(record []string, resolver *columnResolver) etfscraper.Currency {
+	marketCurrency := c.readNormalizedCurrency(record, resolver, c.config.ColumnMappings.MarketCurrency)
+	if marketCurrency != "" {
+		return marketCurrency
+	}
+	return c.readNormalizedCurrency(record, resolver, c.config.ColumnMappings.Currency)
+}
+
+func (c *Client) readNormalizedCurrency(record []string, resolver *columnResolver, mapping []string) etfscraper.Currency {
+	if len(mapping) == 0 {
+		return ""
+	}
+	val, err := resolver.getString(record, mapping)
+	if err != nil {
+		return ""
+	}
+	return normalizeCurrency(val)
 }
 
 func containsAny(slice []string, targets []string) bool {
