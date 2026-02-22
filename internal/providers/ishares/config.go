@@ -19,22 +19,23 @@ type regionConfig struct {
 }
 
 type ColumnMapper struct {
-	Name          []string
-	Ticker        []string
-	ISIN          []string
-	MarketValue   []string
-	Weight        []string
-	Quantity      []string
-	ParValue      []string // For bonds
-	NotionalValue []string
-	Price         []string
-	Sector        []string
-	AssetClass    []string
-	Location      []string
-	Exchange      []string
-	Currency      []string
-	FXRate        []string
-	Type          []string
+	Name           []string
+	Ticker         []string
+	ISIN           []string
+	MarketValue    []string
+	Weight         []string
+	Quantity       []string
+	ParValue       []string // For bonds
+	NotionalValue  []string
+	Price          []string
+	Sector         []string
+	AssetClass     []string
+	Location       []string
+	Exchange       []string
+	Currency       []string
+	MarketCurrency []string
+	FXRate         []string
+	Type           []string
 }
 
 var regionConfigs = map[string]regionConfig{
@@ -48,21 +49,22 @@ var regionConfigs = map[string]regionConfig{
 		DateFormats:         []string{"Jan 2, 2006"},
 		DateHeaderPatterns:  []string{"Fund Holdings as of"},
 		ColumnMappings: ColumnMapper{
-			Name:          []string{"Name"},
-			Ticker:        []string{"Ticker"},
-			ISIN:          []string{"ISIN"},
-			MarketValue:   []string{"Market Value"},
-			Weight:        []string{"Weight (%)", "Market Weight"},
-			NotionalValue: []string{"Notional Value", "Notional Weight"},
-			Quantity:      []string{"Quantity"},
-			Price:         []string{"Price"},
-			Sector:        []string{"Sector"},
-			AssetClass:    []string{"Asset Class"},
-			Location:      []string{"Location"},
-			Exchange:      []string{"Exchange"},
-			Currency:      []string{"Currency", "Market Currency"},
-			FXRate:        []string{"FX Rate"},
-			Type:          []string{"Type"},
+			Name:           []string{"Name"},
+			Ticker:         []string{"Ticker"},
+			ISIN:           []string{"ISIN"},
+			MarketValue:    []string{"Market Value"},
+			Weight:         []string{"Weight (%)", "Market Weight"},
+			NotionalValue:  []string{"Notional Value", "Notional Weight"},
+			Quantity:       []string{"Quantity"},
+			Price:          []string{"Price"},
+			Sector:         []string{"Sector"},
+			AssetClass:     []string{"Asset Class"},
+			Location:       []string{"Location"},
+			Exchange:       []string{"Exchange"},
+			Currency:       []string{"Currency"},
+			MarketCurrency: []string{"Market Currency"},
+			FXRate:         []string{"FX Rate"},
+			Type:           []string{"Type"},
 		},
 	},
 	"de": {
@@ -88,20 +90,21 @@ var regionConfigs = map[string]regionConfig{
 		DateFormats:        []string{"02.Jan.2006"},
 		DateHeaderPatterns: []string{"Fondsposition per", "Fondsbestände am"},
 		ColumnMappings: ColumnMapper{
-			Name:          []string{"Name"},
-			Ticker:        []string{"Emittententicker"},
-			ISIN:          []string{"ISIN"},
-			MarketValue:   []string{"Marktwert"},
-			Weight:        []string{"Gewichtung (%)"},
-			NotionalValue: []string{"Nominalwert"},
-			Quantity:      []string{"Nominale"},
-			Price:         []string{"Kurs"},
-			Sector:        []string{"Sektor"},
-			AssetClass:    []string{"Anlageklasse"},
-			Location:      []string{"Standort"},
-			Exchange:      []string{"Börse"},
-			Currency:      []string{"Währung", "Marktwährung"},
-			FXRate:        []string{"Wechselkurs"},
+			Name:           []string{"Name"},
+			Ticker:         []string{"Emittententicker"},
+			ISIN:           []string{"ISIN"},
+			MarketValue:    []string{"Marktwert"},
+			Weight:         []string{"Gewichtung (%)"},
+			NotionalValue:  []string{"Nominalwert"},
+			Quantity:       []string{"Nominale"},
+			Price:          []string{"Kurs"},
+			Sector:         []string{"Sektor"},
+			AssetClass:     []string{"Anlageklasse"},
+			Location:       []string{"Standort"},
+			Exchange:       []string{"Börse"},
+			Currency:       []string{"Währung"},
+			MarketCurrency: []string{"Marktwährung"},
+			FXRate:         []string{"Wechselkurs"},
 		},
 	},
 	"uk": {
@@ -114,21 +117,22 @@ var regionConfigs = map[string]regionConfig{
 		DateFormats:         []string{"02/Jan/2006"},
 		DateHeaderPatterns:  []string{"Fund Holdings as of"},
 		ColumnMappings: ColumnMapper{
-			Name:          []string{"Name"},
-			Ticker:        []string{"Ticker"},
-			ISIN:          []string{"ISIN"},
-			MarketValue:   []string{"Market Value"},
-			Weight:        []string{"Weight (%)", "Market Weight"},
-			NotionalValue: []string{"Notional Value", "Notional Weight"},
-			Quantity:      []string{"Quantity"},
-			Price:         []string{"Price"},
-			Sector:        []string{"Sector"},
-			AssetClass:    []string{"Asset Class"},
-			Location:      []string{"Location"},
-			Exchange:      []string{"Exchange"},
-			Currency:      []string{"Currency", "Market Currency"},
-			FXRate:        []string{"FX Rate"},
-			Type:          []string{"Type"},
+			Name:           []string{"Name"},
+			Ticker:         []string{"Ticker"},
+			ISIN:           []string{"ISIN"},
+			MarketValue:    []string{"Market Value"},
+			Weight:         []string{"Weight (%)", "Market Weight"},
+			NotionalValue:  []string{"Notional Value", "Notional Weight"},
+			Quantity:       []string{"Quantity"},
+			Price:          []string{"Price"},
+			Sector:         []string{"Sector"},
+			AssetClass:     []string{"Asset Class"},
+			Location:       []string{"Location"},
+			Exchange:       []string{"Exchange"},
+			Currency:       []string{"Currency"},
+			MarketCurrency: []string{"Market Currency"},
+			FXRate:         []string{"FX Rate"},
+			Type:           []string{"Type"},
 		},
 	},
 }
