@@ -25,6 +25,8 @@ func main() {
 	} else {
 		fmt.Printf("Found specific fund: %s (%s)\n", specificFund.Name, specificFund.Ticker)
 		fmt.Printf("   ISIN: %s\n", specificFund.ISIN)
+		fmt.Printf("   Currency: %s\n", specificFund.Currency)
+		fmt.Printf("   Exchange: %s\n", specificFund.Exchange)
 		fmt.Printf("   Expense Ratio: %.2f%%\n", specificFund.ExpenseRatio*100)
 		fmt.Printf("   Assets: $%.1fB\n", specificFund.TotalAssets/1_000_000_000)
 		if specificFund.InceptionDate != nil {
@@ -61,6 +63,8 @@ func main() {
 	for i, fund := range funds[:min(50, len(funds))] {
 		fmt.Printf("%d. %s (%s)\n", i+1, fund.Name, fund.Ticker)
 		fmt.Printf("   ISIN: %s\n", fund.ISIN)
+		fmt.Printf("   Currency: %s\n", fund.Currency)
+		fmt.Printf("   Exchange: %s\n", fund.Exchange)
 		fmt.Printf("   Expense Ratio: %.2f%%\n", fund.ExpenseRatio*100)
 		fmt.Printf("   Assets: $%.1fB\n", fund.TotalAssets/1_000_000_000)
 		if fund.InceptionDate != nil {
