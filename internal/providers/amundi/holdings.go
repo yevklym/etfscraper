@@ -58,6 +58,13 @@ func (c *Client) Holdings(ctx context.Context, identifier string) (*etfscraper.H
 	if err != nil {
 		return nil, err
 	}
+	return c.HoldingsForFund(ctx, fund)
+}
+
+func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*etfscraper.HoldingsSnapshot, error) {
+	if fund == nil {
+		return nil, fmt.Errorf("fund cannot be nil")
+	}
 
 	requestBody, err := buildHoldingsRequest(c.region, fund.ISIN)
 	if err != nil {

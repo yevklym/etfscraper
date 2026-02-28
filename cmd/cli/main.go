@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	provider, err := providers.Open("ishares:uk")
+	provider, err := providers.Open("amundi:de")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,6 +65,7 @@ func main() {
 		fmt.Printf("   ISIN: %s\n", fund.ISIN)
 		fmt.Printf("   Currency: %s\n", fund.Currency)
 		fmt.Printf("   Exchange: %s\n", fund.Exchange)
+		fmt.Printf("   Asset Class: %s\n", fund.AssetClass)
 		fmt.Printf("   Expense Ratio: %.2f%%\n", fund.ExpenseRatio*100)
 		fmt.Printf("   Assets: $%.1fB\n", fund.TotalAssets/1_000_000_000)
 		if fund.InceptionDate != nil {

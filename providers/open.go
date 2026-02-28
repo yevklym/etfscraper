@@ -47,9 +47,17 @@ func OpenNameRegion(name, region string, opts ...Option) (etfscraper.Provider, e
 
 	switch strings.ToLower(name) {
 	case "ishares":
-		return ishares.New(region, ishares.WithHTTPConfig(options.httpConfig))
+		isharesOpts := []ishares.ClientOption{ishares.WithHTTPConfig(options.httpConfig)}
+		if options.cacheTTL != nil {
+			isharesOpts = append(isharesOpts, ishares.WithCacheTTL(*options.cacheTTL))
+		}
+		return ishares.New(region, isharesOpts...)
 	case "amundi":
-		return amundi.New(region, amundi.WithHTTPConfig(options.httpConfig))
+		amundiOpts := []amundi.ClientOption{amundi.WithHTTPConfig(options.httpConfig)}
+		if options.cacheTTL != nil {
+			amundiOpts = append(amundiOpts, amundi.WithCacheTTL(*options.cacheTTL))
+		}
+		return amundi.New(region, amundiOpts...)
 	default:
 		return nil, fmt.Errorf("unknown provider: %s", name)
 	}
