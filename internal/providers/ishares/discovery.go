@@ -133,7 +133,8 @@ func (c *Client) isValidETF(data ISharesETFData) bool {
 	}
 
 	// Must have a valid ticker (not dash or empty)
-	if data.LocalExchangeTicker == "-" || data.LocalExchangeTicker == "" {
+	ticker := strings.TrimSpace(data.LocalExchangeTicker)
+	if ticker == "-" || ticker == "" {
 		return false
 	}
 
@@ -175,7 +176,7 @@ func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
 	}
 
 	fund := etfscraper.Fund{
-		Ticker:       data.LocalExchangeTicker,
+		Ticker:       strings.TrimSpace(data.LocalExchangeTicker),
 		Name:         data.FundName,
 		ISIN:         data.ISIN,
 		Provider:     etfscraper.ProviderIShares,

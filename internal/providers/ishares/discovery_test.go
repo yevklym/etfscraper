@@ -95,6 +95,36 @@ func TestConvertSingleFund(t *testing.T) {
 	}
 }
 
+func TestConvertSingleFund_TrimsTickerWhitespace(t *testing.T) {
+	c := &Client{config: regionConfigs["fr"]}
+
+	tests := []struct {
+		name   string
+		ticker string
+		want   string
+	}{
+		{"trailing NBSP", "EDMW\u00A0", "EDMW"},
+		{"trailing space and NBSP", "CEMA \u00A0", "CEMA"},
+		{"multiple NBSP", "EDMJ\u00A0\u00A0", "EDMJ"},
+		{"clean ticker", "CSPX", "CSPX"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			input := ISharesETFData{
+				LocalExchangeTicker: tt.ticker,
+				FundName:            "Test Fund",
+				ISIN:                "IE0000000001",
+				ProductView:         []string{"all", "ishares"},
+			}
+			fund := c.convertSingleFund(input)
+			if fund.Ticker != tt.want {
+				t.Errorf("expected ticker %q, got %q", tt.want, fund.Ticker)
+			}
+		})
+	}
+}
+
 func TestDiscoverETFs_WrapperFormat(t *testing.T) {
 	sampleJSON := `{
 		"i": {
