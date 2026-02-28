@@ -95,7 +95,7 @@ func (c *Client) convertToFunds(products []product) []etfscraper.Fund {
 			Currency:       mapCurrency(p.Characteristics.Currency),
 			ExpenseRatio:   p.Characteristics.Ter / 100.0,
 			TotalAssets:    p.Characteristics.FundAUM,
-			AssetClass:     mapAssetClass(p.Characteristics.AssetClass),
+			AssetClass:     normalizeAssetClass(p.Characteristics.AssetClass, c.config.AssetClassMapping),
 			IsDistributing: isDistributing(p.Characteristics.DistributionPolicy),
 		}
 		f.ProviderMetadata = amundiFundMetadata{

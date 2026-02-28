@@ -50,8 +50,8 @@ func TestDiscoverETFs(t *testing.T) {
 	if math.Abs(found.ExpenseRatio-expectedExpense) > 1e-6 {
 		t.Errorf("expected expense ratio %.4f, got %.6f", expectedExpense, found.ExpenseRatio)
 	}
-	if found.AssetClass != etfscraper.AssetClass("Multi Asset") {
-		t.Errorf("expected asset class %q, got %q", "Multi Asset", found.AssetClass)
+	if found.AssetClass != etfscraper.AssetClassAlternative {
+		t.Errorf("expected asset class %q, got %q", etfscraper.AssetClassAlternative, found.AssetClass)
 	}
 
 	liquidated := findFundByISIN(funds, "LU2469335025")

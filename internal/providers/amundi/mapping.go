@@ -93,26 +93,32 @@ func mapCurrency(value string) etfscraper.Currency {
 	}
 }
 
-func mapAssetClass(value string) etfscraper.AssetClass {
+// normalizeAssetClass maps an asset class or holdings type value to a canonical AssetClass
+func normalizeAssetClass(value string, mapping map[string]etfscraper.AssetClass) etfscraper.AssetClass {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
 		return ""
 	}
 
-	switch strings.ToLower(trimmed) {
-	case "equity":
-		return etfscraper.AssetClassEquity
-	case "fixed income":
-		return etfscraper.AssetClassBond
-	case "cash":
-		return etfscraper.AssetClassCash
-	case "commodity":
-		return etfscraper.AssetClassCommodity
-	case "real estate":
-		return etfscraper.AssetClassRealEstate
-	default:
-		return etfscraper.AssetClass(trimmed)
+	if ac, ok := mapping[strings.ToLower(trimmed)]; ok {
+		return ac
 	}
+
+	return etfscraper.AssetClass(trimmed)
+}
+
+// normalizeSector maps a sector value to a canonical Sector
+func normalizeSector(value string, mapping map[string]etfscraper.Sector) etfscraper.Sector {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return ""
+	}
+
+	if s, ok := mapping[strings.ToLower(trimmed)]; ok {
+		return s
+	}
+
+	return etfscraper.Sector(trimmed)
 }
 
 func isDistributing(policy string) bool {

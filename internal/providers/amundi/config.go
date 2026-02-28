@@ -3,17 +3,21 @@ package amundi
 import (
 	"fmt"
 	"sort"
+
+	"github.com/yevklym/etfscraper"
 )
 
 type regionConfig struct {
-	BaseURL        string
-	DiscoveryPath  string
-	HoldingsPath   string
-	CountryCode    string
-	CountryName    string
-	LanguageCode   string
-	LanguageName   string
-	DefaultHeaders map[string]string
+	BaseURL           string
+	DiscoveryPath     string
+	HoldingsPath      string
+	CountryCode       string
+	CountryName       string
+	LanguageCode      string
+	LanguageName      string
+	DefaultHeaders    map[string]string
+	AssetClassMapping map[string]etfscraper.AssetClass
+	SectorMapping     map[string]etfscraper.Sector
 }
 
 var regionConfigs = map[string]regionConfig{
@@ -31,6 +35,33 @@ var regionConfigs = map[string]regionConfig{
 			"Origin":       "https://www.amundietf.de",
 			"Referer":      "https://www.amundietf.de/",
 		},
+		AssetClassMapping: map[string]etfscraper.AssetClass{
+			// Discovery ASSET_CLASS values
+			"equity":       etfscraper.AssetClassEquity,
+			"fixed income": etfscraper.AssetClassBond,
+			"commodities":  etfscraper.AssetClassCommodity,
+			"multi asset":  etfscraper.AssetClassAlternative,
+			"alternatives": etfscraper.AssetClassAlternative,
+			// Holdings type values
+			"equity_ordinary":  etfscraper.AssetClassEquity,
+			"equity_preferred": etfscraper.AssetClassEquity,
+			"bond":             etfscraper.AssetClassBond,
+			"cash":             etfscraper.AssetClassCash,
+		},
+		SectorMapping: map[string]etfscraper.Sector{
+			"energy":                 etfscraper.SectorEnergy,
+			"materials":              etfscraper.SectorMaterials,
+			"industrials":            etfscraper.SectorIndustrials,
+			"consumer discretionary": etfscraper.SectorConsumerDiscretionary,
+			"consumer staples":       etfscraper.SectorConsumerStaples,
+			"health care":            etfscraper.SectorHealthcare,
+			"financials":             etfscraper.SectorFinancials,
+			"information technology": etfscraper.SectorInformationTechnology,
+			"communication":          etfscraper.SectorTelecommunication,
+			"communication services": etfscraper.SectorTelecommunication,
+			"utilities":              etfscraper.SectorUtilities,
+			"real estate":            etfscraper.SectorRealEstate,
+		},
 	},
 	"uk": {
 		BaseURL:       "https://www.amundietf.co.uk",
@@ -45,6 +76,31 @@ var regionConfigs = map[string]regionConfig{
 			"Origin":       "https://www.amundietf.co.uk",
 			"Referer":      "https://www.amundietf.co.uk/",
 		},
+		AssetClassMapping: map[string]etfscraper.AssetClass{
+			"equity":           etfscraper.AssetClassEquity,
+			"fixed income":     etfscraper.AssetClassBond,
+			"commodities":      etfscraper.AssetClassCommodity,
+			"multi asset":      etfscraper.AssetClassAlternative,
+			"alternatives":     etfscraper.AssetClassAlternative,
+			"equity_ordinary":  etfscraper.AssetClassEquity,
+			"equity_preferred": etfscraper.AssetClassEquity,
+			"bond":             etfscraper.AssetClassBond,
+			"cash":             etfscraper.AssetClassCash,
+		},
+		SectorMapping: map[string]etfscraper.Sector{
+			"energy":                 etfscraper.SectorEnergy,
+			"materials":              etfscraper.SectorMaterials,
+			"industrials":            etfscraper.SectorIndustrials,
+			"consumer discretionary": etfscraper.SectorConsumerDiscretionary,
+			"consumer staples":       etfscraper.SectorConsumerStaples,
+			"health care":            etfscraper.SectorHealthcare,
+			"financials":             etfscraper.SectorFinancials,
+			"information technology": etfscraper.SectorInformationTechnology,
+			"communication":          etfscraper.SectorTelecommunication,
+			"communication services": etfscraper.SectorTelecommunication,
+			"utilities":              etfscraper.SectorUtilities,
+			"real estate":            etfscraper.SectorRealEstate,
+		},
 	},
 	"fr": {
 		BaseURL:       "https://www.amundietf.fr",
@@ -58,6 +114,31 @@ var regionConfigs = map[string]regionConfig{
 			"Accept":       "application/json, text/plain, */*",
 			"Origin":       "https://www.amundietf.fr",
 			"Referer":      "https://www.amundietf.fr/",
+		},
+		AssetClassMapping: map[string]etfscraper.AssetClass{
+			"equity":           etfscraper.AssetClassEquity,
+			"fixed income":     etfscraper.AssetClassBond,
+			"commodities":      etfscraper.AssetClassCommodity,
+			"multi asset":      etfscraper.AssetClassAlternative,
+			"alternatives":     etfscraper.AssetClassAlternative,
+			"equity_ordinary":  etfscraper.AssetClassEquity,
+			"equity_preferred": etfscraper.AssetClassEquity,
+			"bond":             etfscraper.AssetClassBond,
+			"cash":             etfscraper.AssetClassCash,
+		},
+		SectorMapping: map[string]etfscraper.Sector{
+			"energy":                 etfscraper.SectorEnergy,
+			"materials":              etfscraper.SectorMaterials,
+			"industrials":            etfscraper.SectorIndustrials,
+			"consumer discretionary": etfscraper.SectorConsumerDiscretionary,
+			"consumer staples":       etfscraper.SectorConsumerStaples,
+			"health care":            etfscraper.SectorHealthcare,
+			"financials":             etfscraper.SectorFinancials,
+			"information technology": etfscraper.SectorInformationTechnology,
+			"communication":          etfscraper.SectorTelecommunication,
+			"communication services": etfscraper.SectorTelecommunication,
+			"utilities":              etfscraper.SectorUtilities,
+			"real estate":            etfscraper.SectorRealEstate,
 		},
 	},
 }
