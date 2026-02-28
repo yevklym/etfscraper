@@ -25,7 +25,7 @@ type Spec struct {
 func Open(spec string, opts ...Option) (etfscraper.Provider, error) {
 	name, region, err := ParseProviderSpec(spec)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invalid provider spec %q: %w", spec, err)
 	}
 
 	return OpenNameRegion(name, region, opts...)

@@ -56,7 +56,7 @@ type compositionResponse struct {
 func (c *Client) Holdings(ctx context.Context, identifier string) (*etfscraper.HoldingsSnapshot, error) {
 	fund, err := c.FundInfo(ctx, identifier)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("amundi: holdings: %w", err)
 	}
 	return c.HoldingsForFund(ctx, fund)
 }
@@ -84,7 +84,7 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 
 	resp, err := c.doPost(ctx, url, body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("amundi: holdings: %w", err)
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
@@ -96,7 +96,7 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 		if c.httpConfig.Debug {
 			log.Printf("amundi: holdings response %s", resp.Status)
 		}
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
+		return nil, fmt.Errorf("amundi: holdings: HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
 
 	var payload holdingsResponse
@@ -106,17 +106,17 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 
 	product, err := selectHoldingsProduct(payload.Products, fund.ISIN)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("amundi: holdings: %w", err)
 	}
 
 	asOfDate, err := parseHoldingsDate(product.Characteristics)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("amundi: holdings: %w", err)
 	}
 
 	composition, err := parseComposition(product.Composition)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("amundi: holdings: %w", err)
 	}
 
 	holdings := c.convertHoldings(composition, fund.TotalAssets)
@@ -264,7 +264,7 @@ func (d *dateValue) UnmarshalJSON(data []byte) error {
 		}
 		parsed, err := time.Parse("2006-01-02", unquoted)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to parse date %q: %w", unquoted, err)
 		}
 		d.Time = parsed.UTC()
 		d.Valid = true
@@ -273,7 +273,7 @@ func (d *dateValue) UnmarshalJSON(data []byte) error {
 
 	var value float64
 	if err := json.Unmarshal(data, &value); err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal date value: %w", err)
 	}
 	if value <= 0 {
 		return nil
