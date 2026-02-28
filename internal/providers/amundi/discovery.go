@@ -36,6 +36,17 @@ type characteristics struct {
 }
 
 func (c *Client) DiscoverETFs(ctx context.Context) ([]etfscraper.Fund, error) {
+	funds, err := c.discoverCached(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// Return a copy so callers cannot mutate the cache.
+	out := make([]etfscraper.Fund, len(funds))
+	copy(out, funds)
+	return out, nil
+}
+
+func (c *Client) discoverFresh(ctx context.Context) ([]etfscraper.Fund, error) {
 	requestBody, err := buildDiscoveryRequest(c.region)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build discovery request: %w", err)

@@ -70,3 +70,13 @@ func WithDebug(enabled bool) ClientOption {
 		c.httpConfig.Debug = enabled
 	}
 }
+
+// WithCacheTTL sets the time-to-live for the discovery cache.
+// Cached fund data is reused across FundInfo and Holdings calls
+// within this duration, avoiding repeated API requests.
+// Default is 5 minutes. Set to 0 to disable caching.
+func WithCacheTTL(ttl time.Duration) ClientOption {
+	return func(c *Client) {
+		c.cacheTTL = ttl
+	}
+}

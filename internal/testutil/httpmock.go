@@ -43,3 +43,14 @@ func (m *MockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 
 	return response, nil
 }
+
+// CountingMockHTTPClient wraps MockHTTPClient and counts calls.
+type CountingMockHTTPClient struct {
+	MockHTTPClient
+	CallCount int
+}
+
+func (c *CountingMockHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	c.CallCount++
+	return c.MockHTTPClient.Do(req)
+}

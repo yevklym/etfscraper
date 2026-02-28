@@ -11,6 +11,7 @@ type Option func(*providerOptions)
 
 type providerOptions struct {
 	httpConfig etfscraper.HTTPConfig
+	cacheTTL   *time.Duration // nil means use provider default
 }
 
 // WithHTTPConfig applies a complete HTTP configuration to provider clients.
@@ -50,5 +51,15 @@ func WithHTTPClient(client etfscraper.HTTPClient) Option {
 func WithDebug(enabled bool) Option {
 	return func(o *providerOptions) {
 		o.httpConfig.Debug = enabled
+	}
+}
+
+// WithCacheTTL sets the time-to-live for the provider's discovery cache.
+// Cached fund data is reused across FundInfo and Holdings calls within
+// this duration, avoiding repeated API requests.
+// Default is 5 minutes. Set to 0 to disable caching.
+func WithCacheTTL(ttl time.Duration) Option {
+	return func(o *providerOptions) {
+		o.cacheTTL = &ttl
 	}
 }
