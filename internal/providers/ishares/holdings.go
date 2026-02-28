@@ -90,7 +90,7 @@ func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscr
 		return nil, fmt.Errorf("failed to find data header: %w", err)
 	}
 
-	resolver := newColumnResolver(headerRow, c.config.ColumnMappings)
+	resolver := newColumnResolver(headerRow)
 
 	// Parse holdings data using column map
 	var holdings []etfscraper.Holding

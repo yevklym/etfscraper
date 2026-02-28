@@ -12,12 +12,12 @@ import (
 	"github.com/yevklym/etfscraper/internal/testutil"
 )
 
-func TestParseISharesDate(t *testing.T) {
+func TestParseDate(t *testing.T) {
 	t.Run("valid date", func(t *testing.T) {
 		dateInt := 20231225
 		expected := time.Date(2023, time.December, 25, 0, 0, 0, 0, time.UTC)
 
-		result := parseISharesDate(dateInt)
+		result := parseDate(dateInt)
 
 		if result == nil {
 			t.Fatalf("Expected date, but got nil")
@@ -30,7 +30,7 @@ func TestParseISharesDate(t *testing.T) {
 	t.Run("invalid date format", func(t *testing.T) {
 		dateInt := 202312250 // Extra digit
 
-		result := parseISharesDate(dateInt)
+		result := parseDate(dateInt)
 
 		if result != nil {
 			t.Errorf("Expected nil for invalid date, but got %v", *result)
@@ -40,7 +40,7 @@ func TestParseISharesDate(t *testing.T) {
 	t.Run("zero date", func(t *testing.T) {
 		dateInt := 0
 
-		result := parseISharesDate(dateInt)
+		result := parseDate(dateInt)
 
 		if result != nil {
 			t.Errorf("Expected nil for zero date, but got %v", *result)
@@ -51,7 +51,7 @@ func TestParseISharesDate(t *testing.T) {
 func TestConvertSingleFund(t *testing.T) {
 	c := &Client{config: regionConfigs["us"]}
 
-	input := ISharesETFData{
+	input := etfData{
 		PortfolioID:         12345,
 		FundName:            "Test Fund",
 		LocalExchangeTicker: "TEST",
@@ -68,7 +68,7 @@ func TestConvertSingleFund(t *testing.T) {
 			Display string  `json:"d"`
 			Raw     float64 `json:"r"`
 		}{Raw: 1000000.0},
-		ProductPageUrl: "/us/products/12345/test-fund",
+		ProductPageURL: "/us/products/12345/test-fund",
 	}
 
 	inceptionDate := time.Date(2020, time.January, 15, 0, 0, 0, 0, time.UTC)
@@ -111,7 +111,7 @@ func TestConvertSingleFund_TrimsTickerWhitespace(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			input := ISharesETFData{
+			input := etfData{
 				LocalExchangeTicker: tt.ticker,
 				FundName:            "Test Fund",
 				ISIN:                "IE0000000001",
@@ -193,7 +193,7 @@ func TestDiscoverETFs_ProductViewFormat(t *testing.T) {
 }
 
 func TestConvertSingleFund_RegionDefaults(t *testing.T) {
-	input := ISharesETFData{
+	input := etfData{
 		PortfolioID:         12345,
 		FundName:            "Test Fund",
 		LocalExchangeTicker: "TEST",
@@ -223,7 +223,7 @@ func TestConvertSingleFund_RegionDefaults(t *testing.T) {
 func TestConvertSingleFund_OverridesCurrencyAndExchange(t *testing.T) {
 	c := &Client{config: regionConfigs["us"]}
 
-	input := ISharesETFData{
+	input := etfData{
 		PortfolioID:         98765,
 		FundName:            "Override Fund",
 		LocalExchangeTicker: "OVRD",

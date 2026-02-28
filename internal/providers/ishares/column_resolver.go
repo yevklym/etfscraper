@@ -8,16 +8,15 @@ import (
 
 type columnResolver struct {
 	columnMap map[string]int
-	mapper    ColumnMapper
 }
 
-func newColumnResolver(headers []string, mapper ColumnMapper) *columnResolver {
+func newColumnResolver(headers []string) *columnResolver {
 	columnMap := make(map[string]int)
 	for i, col := range headers {
 		columnMap[strings.TrimSpace(col)] = i
 	}
 
-	return &columnResolver{columnMap: columnMap, mapper: mapper}
+	return &columnResolver{columnMap: columnMap}
 }
 
 // try all possible column name variations of a field

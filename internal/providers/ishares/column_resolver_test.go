@@ -4,7 +4,7 @@ import "testing"
 
 func TestColumnResolver_FindColumn(t *testing.T) {
 	headers := []string{"Name", "Ticker", "Market Value", "Weight (%)"}
-	resolver := newColumnResolver(headers, ColumnMapper{})
+	resolver := newColumnResolver(headers)
 
 	tests := []struct {
 		name       string
@@ -53,7 +53,7 @@ func TestColumnResolver_FindColumn(t *testing.T) {
 
 func TestColumnResolver_GetString(t *testing.T) {
 	headers := []string{"Name", "Ticker", "Description"}
-	resolver := newColumnResolver(headers, ColumnMapper{})
+	resolver := newColumnResolver(headers)
 
 	tests := []struct {
 		name       string
@@ -115,7 +115,7 @@ func TestColumnResolver_GetString(t *testing.T) {
 
 func TestColumnResolver_GetFloat(t *testing.T) {
 	headers := []string{"Name", "Market Value", "Weight"}
-	resolver := newColumnResolver(headers, ColumnMapper{})
+	resolver := newColumnResolver(headers)
 
 	tests := []struct {
 		name       string
