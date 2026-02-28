@@ -1,3 +1,6 @@
+// Package providers is the public factory for creating ETF data providers.
+// Use Open, OpenSpec, or OpenNameRegion to create a Provider for a given
+// provider name and region (e.g. "ishares:us", "amundi:de").
 package providers
 
 import (
@@ -10,6 +13,7 @@ import (
 	"github.com/yevklym/etfscraper/internal/providers/ishares"
 )
 
+// ProviderSpec describes a provider and its supported regions.
 type ProviderSpec struct {
 	Name    string
 	Regions []string
