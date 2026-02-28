@@ -7,6 +7,7 @@ import (
 	"github.com/yevklym/etfscraper"
 )
 
+// Option configures a provider created via Open, OpenSpec, or OpenNameRegion.
 type Option func(*providerOptions)
 
 type providerOptions struct {

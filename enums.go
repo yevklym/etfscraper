@@ -15,6 +15,7 @@ type Sector string
 // Location represents a country or region
 type Location string
 
+// ProviderName identifies an ETF data provider.
 type ProviderName string
 
 // Currency constants
@@ -74,6 +75,7 @@ const (
 	SectorRealEstate            Sector = "Real Estate"
 )
 
+// ProviderName constants for supported providers.
 const (
 	ProviderIShares ProviderName = "iShares"
 	ProviderAmundi  ProviderName = "Amundi"

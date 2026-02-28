@@ -1,3 +1,4 @@
+// Package amundi provides a client for fetching Amundi ETF data.
 package amundi
 
 import (

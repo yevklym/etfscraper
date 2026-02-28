@@ -1,3 +1,5 @@
+// Package etfscraper provides types and interfaces for discovering ETFs
+// and fetching fund metadata and holdings from providers like iShares and Amundi.
 package etfscraper
 
 import (
