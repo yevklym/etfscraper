@@ -52,7 +52,7 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 		return nil, fmt.Errorf("ishares: holdings: HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
 
-	return c.parseHoldings(resp.Body, fund)
+	return c.parseHoldings(ctx, resp.Body, fund)
 }
 
 func (c *Client) generateHoldingsURL(fund etfscraper.Fund) (string, error) {
@@ -73,7 +73,7 @@ func (c *Client) generateHoldingsURL(fund etfscraper.Fund) (string, error) {
 	return "", fmt.Errorf("unable to generate holding URL for %s", fund.Ticker)
 }
 
-func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscraper.HoldingsSnapshot, error) {
+func (c *Client) parseHoldings(ctx context.Context, reader io.Reader, fund *etfscraper.Fund) (*etfscraper.HoldingsSnapshot, error) {
 	csvReader := csv.NewReader(reader)
 	csvReader.LazyQuotes = true
 	csvReader.FieldsPerRecord = -1
@@ -93,8 +93,14 @@ func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscr
 	resolver := newColumnResolver(headerRow)
 
 	// Parse holdings data using column map
-	var holdings []etfscraper.Holding
+	holdings := make([]etfscraper.Holding, 0, 128)
 	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
 		record, err := csvReader.Read()
 		if err == io.EOF {
 			break
@@ -109,7 +115,7 @@ func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscr
 			break
 		}
 
-		if !c.isValidHoldingRow(record, resolver) {
+		if isDisclaimerRow(record) {
 			break
 		}
 
@@ -135,30 +141,11 @@ func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscr
 	}, nil
 }
 
-func (c *Client) isValidHoldingRow(record []string, resolver *columnResolver) bool {
-
-	// Check if we can get a name
-	name, err := resolver.getString(record, c.config.ColumnMappings.Name)
-	if err != nil || strings.TrimSpace(name) == "" {
-		return false
-	}
-
-	// Check if a market value is numeric
-	_, err = resolver.getFloat(record, c.config.ColumnMappings.MarketValue)
-	if err != nil {
-		return false
-	}
-
-	// Check if weight is numeric
-	_, err = resolver.getFloat(record, c.config.ColumnMappings.Weight)
-	if err != nil {
-		return false
-	}
-
-	// Disclaimer check
+// isDisclaimerRow detects footer/disclaimer rows that should terminate CSV parsing.
+func isDisclaimerRow(record []string) bool {
 	firstField := strings.TrimSpace(record[0])
 	if len(firstField) > 100 {
-		return false
+		return true
 	}
 
 	disqualifiers := []string{
@@ -171,11 +158,11 @@ func (c *Client) isValidHoldingRow(record []string, resolver *columnResolver) bo
 	firstFieldLower := strings.ToLower(firstField)
 	for _, disqualifier := range disqualifiers {
 		if strings.Contains(firstFieldLower, strings.ToLower(disqualifier)) {
-			return false
+			return true
 		}
 	}
 
-	return true
+	return false
 }
 
 // parseHoldingRecord extracts a Holding from a CSV record using dynamic column mapping

@@ -93,7 +93,7 @@ func (c *Client) discoverFresh(ctx context.Context) ([]etfscraper.Fund, error) {
 }
 
 func (c *Client) convertToFunds(products []product) []etfscraper.Fund {
-	var out []etfscraper.Fund
+	out := make([]etfscraper.Fund, 0, len(products))
 	for _, p := range products {
 		if p.ProductType != "PRODUCT" {
 			continue

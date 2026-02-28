@@ -145,7 +145,18 @@ var regionConfigs = map[string]regionConfig{
 	},
 }
 
-// buildDiscoveryRequest creates a discovery request for a specific region
+// buildRequestContext returns the shared context map used by all Amundi API requests.
+func buildRequestContext(cfg regionConfig) map[string]string {
+	return map[string]string{
+		"countryCode":     cfg.CountryCode,
+		"countryName":     cfg.CountryName,
+		"languageCode":    cfg.LanguageCode,
+		"languageName":    cfg.LanguageName,
+		"userProfileName": "RETAIL",
+	}
+}
+
+// buildDiscoveryRequest creates a discovery request for a specific region.
 func buildDiscoveryRequest(region string) (map[string]any, error) {
 	cfg, ok := regionConfigs[region]
 	if !ok {
@@ -153,13 +164,7 @@ func buildDiscoveryRequest(region string) (map[string]any, error) {
 	}
 
 	return map[string]any{
-		"context": map[string]string{
-			"countryCode":     cfg.CountryCode,
-			"countryName":     cfg.CountryName,
-			"languageCode":    cfg.LanguageCode,
-			"languageName":    cfg.LanguageName,
-			"userProfileName": "RETAIL",
-		},
+		"context":     buildRequestContext(cfg),
 		"productType": "PRODUCT",
 		"characteristics": []string{
 			// Identity
@@ -217,13 +222,7 @@ func buildHoldingsRequest(region, isin string) (map[string]any, error) {
 	}
 
 	return map[string]any{
-		"context": map[string]string{
-			"countryCode":     cfg.CountryCode,
-			"countryName":     cfg.CountryName,
-			"languageCode":    cfg.LanguageCode,
-			"languageName":    cfg.LanguageName,
-			"userProfileName": "RETAIL",
-		},
+		"context":    buildRequestContext(cfg),
 		"productIds": []string{isin},
 		"characteristics": []string{
 			"ISIN",

@@ -1,6 +1,7 @@
 package ishares
 
 import (
+	"context"
 	"strings"
 	"testing"
 	"time"
@@ -32,7 +33,7 @@ Ticker,Name,Type,Sector,Asset Class,Market Value,Notional Value,Quantity,Price,L
 
 	fund := &etfscraper.Fund{Ticker: "IJJ", Name: "iShares S&P Mid-Cap 400 Value ETF"}
 
-	snapshot, err := c.parseHoldings(strings.NewReader(csvData), fund)
+	snapshot, err := c.parseHoldings(context.Background(), strings.NewReader(csvData), fund)
 	if err != nil {
 		t.Fatalf("parseHoldings failed: %v", err)
 	}
@@ -86,7 +87,7 @@ Name,Market Value,Weight (%),Quantity
 
 	fund := &etfscraper.Fund{Ticker: "IEUR", Name: "iShares Core MSCI Europe ETF"}
 
-	snapshot, err := c.parseHoldings(strings.NewReader(csvData), fund)
+	snapshot, err := c.parseHoldings(context.Background(), strings.NewReader(csvData), fund)
 	if err != nil {
 		t.Fatalf("parseHoldings failed: %v", err)
 	}
@@ -137,7 +138,7 @@ func TestParseHoldings_FrenchFormat(t *testing.T) {
 
 	fund := &etfscraper.Fund{Ticker: "CSPX", Name: "iShares S&P 500 (Acc)"}
 
-	snapshot, err := c.parseHoldings(strings.NewReader(csvData), fund)
+	snapshot, err := c.parseHoldings(context.Background(), strings.NewReader(csvData), fund)
 	if err != nil {
 		t.Fatalf("parseHoldings failed: %v", err)
 	}
