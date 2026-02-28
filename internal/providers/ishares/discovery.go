@@ -30,27 +30,22 @@ func (f *isharesDataField) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type ISharesETFData struct {
+type etfData struct {
 	PortfolioID         int    `json:"portfolioId"`
 	FundName            string `json:"fundName"`
 	LocalExchangeTicker string `json:"localExchangeTicker"`
 	ISIN                string `json:"isin"`
-	CUSIP               string `json:"cusip"`
 	ProductType         string `json:"productType"`
 	InceptionDate       struct {
 		Display string `json:"d"`
 		Raw     int    `json:"r"`
 	} `json:"inceptionDate"`
-	Fees               isharesDataField `json:"fees"`
 	NetExpenseRatio    isharesDataField `json:"netr"`
 	Ter                isharesDataField `json:"ter"`
 	TerOcf             isharesDataField `json:"ter_ocf"`
 	TotalNetAssets     isharesDataField `json:"totalNetAssets"`
-	NavAmount          isharesDataField `json:"navAmount"`
-	ProductPageUrl     string           `json:"productPageUrl"`
+	ProductPageURL     string           `json:"productPageUrl"`
 	AladdinAssetClass  string           `json:"aladdinAssetClass"`
-	AladdinCountry     string           `json:"aladdinCountry"`
-	AladdinRegion      string           `json:"aladdinRegion"`
 	SeriesBaseCurrency string           `json:"seriesBaseCurrency"`
 	Exchange           string           `json:"exchange"`
 	ProductView        []string         `json:"productView"`
@@ -75,7 +70,6 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
 
-	// Only defer if resp is not nil
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
 			log.Printf("Warning: failed to close response body: %v", closeErr)
@@ -97,14 +91,14 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 	// 1. Try the Wrapper Format (US) FIRST
 	// We check for 'I' being non-empty to ensure it's actually the wrapped format
 	var wrapper struct {
-		I map[string]ISharesETFData `json:"i"`
+		I map[string]etfData `json:"i"`
 	}
 	if err := json.Unmarshal(body, &wrapper); err == nil && len(wrapper.I) > 0 {
 		return c.convertToFunds(wrapper.I), nil
 	}
 
 	// 2. Fallback to Direct Map Format (DE/Other)
-	var result map[string]ISharesETFData
+	var result map[string]etfData
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("failed to decode JSON with either format: %w", err)
 	}
@@ -112,7 +106,7 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 	return c.convertToFunds(result), nil
 }
 
-func (c *Client) convertToFunds(etfData map[string]ISharesETFData) []etfscraper.Fund {
+func (c *Client) convertToFunds(etfData map[string]etfData) []etfscraper.Fund {
 	var funds []etfscraper.Fund
 
 	for _, data := range etfData {
@@ -127,8 +121,8 @@ func (c *Client) convertToFunds(etfData map[string]ISharesETFData) []etfscraper.
 	return funds
 }
 
-func (c *Client) isValidETF(data ISharesETFData) bool {
-	if data.ProductType != "ISHARES_FUND_DATA" && !hasISharesProductView(data.ProductView) {
+func (c *Client) isValidETF(data etfData) bool {
+	if data.ProductType != "ISHARES_FUND_DATA" && !hasProductView(data.ProductView) {
 		return false
 	}
 
@@ -146,7 +140,7 @@ func (c *Client) isValidETF(data ISharesETFData) bool {
 	return true
 }
 
-func hasISharesProductView(values []string) bool {
+func hasProductView(values []string) bool {
 	for _, value := range values {
 		if strings.EqualFold(strings.TrimSpace(value), "ishares") {
 			return true
@@ -155,7 +149,7 @@ func hasISharesProductView(values []string) bool {
 	return false
 }
 
-func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
+func (c *Client) convertSingleFund(data etfData) etfscraper.Fund {
 	var expenseRatio float64
 	if data.NetExpenseRatio.Raw > 0 {
 		expenseRatio = data.NetExpenseRatio.Raw / 100.0
@@ -189,12 +183,12 @@ func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
 
 	fund.ProviderMetadata = iSharesFundMetadata{
 		PortfolioID:    data.PortfolioID,
-		ProductPageURL: data.ProductPageUrl,
+		ProductPageURL: data.ProductPageURL,
 	}
 
 	// Parse inception date
 	if data.InceptionDate.Raw > 0 {
-		if date := parseISharesDate(data.InceptionDate.Raw); date != nil {
+		if date := parseDate(data.InceptionDate.Raw); date != nil {
 			fund.InceptionDate = date
 		}
 	}
@@ -202,7 +196,7 @@ func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
 	return fund
 }
 
-func parseISharesDate(dateInt int) *time.Time {
+func parseDate(dateInt int) *time.Time {
 	dateStr := fmt.Sprintf("%d", dateInt)
 	if len(dateStr) != 8 {
 		return nil

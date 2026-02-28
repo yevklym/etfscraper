@@ -28,7 +28,6 @@ type ColumnMapper struct {
 	Weight         []string
 	Quantity       []string
 	ParValue       []string // For bonds
-	NotionalValue  []string
 	Price          []string
 	Sector         []string
 	AssetClass     []string
@@ -36,8 +35,6 @@ type ColumnMapper struct {
 	Exchange       []string
 	Currency       []string
 	MarketCurrency []string
-	FXRate         []string
-	Type           []string
 }
 
 var regionConfigs = map[string]regionConfig{
@@ -78,7 +75,6 @@ var regionConfigs = map[string]regionConfig{
 			ISIN:           []string{"ISIN"},
 			MarketValue:    []string{"Market Value"},
 			Weight:         []string{"Weight (%)", "Market Weight"},
-			NotionalValue:  []string{"Notional Value", "Notional Weight"},
 			Quantity:       []string{"Quantity"},
 			Price:          []string{"Price"},
 			Sector:         []string{"Sector"},
@@ -87,8 +83,6 @@ var regionConfigs = map[string]regionConfig{
 			Exchange:       []string{"Exchange"},
 			Currency:       []string{"Currency"},
 			MarketCurrency: []string{"Market Currency"},
-			FXRate:         []string{"FX Rate"},
-			Type:           []string{"Type"},
 		},
 	},
 	"de": {
@@ -141,7 +135,6 @@ var regionConfigs = map[string]regionConfig{
 			ISIN:           []string{"ISIN"},
 			MarketValue:    []string{"Marktwert"},
 			Weight:         []string{"Gewichtung (%)"},
-			NotionalValue:  []string{"Nominalwert"},
 			Quantity:       []string{"Nominale"},
 			Price:          []string{"Kurs"},
 			Sector:         []string{"Sektor"},
@@ -150,7 +143,6 @@ var regionConfigs = map[string]regionConfig{
 			Exchange:       []string{"Börse"},
 			Currency:       []string{"Währung"},
 			MarketCurrency: []string{"Marktwährung"},
-			FXRate:         []string{"Wechselkurs"},
 		},
 	},
 	"uk": {
@@ -190,7 +182,6 @@ var regionConfigs = map[string]regionConfig{
 			ISIN:           []string{"ISIN"},
 			MarketValue:    []string{"Market Value"},
 			Weight:         []string{"Weight (%)", "Market Weight"},
-			NotionalValue:  []string{"Notional Value", "Notional Weight"},
 			Quantity:       []string{"Quantity"},
 			Price:          []string{"Price"},
 			Sector:         []string{"Sector"},
@@ -199,8 +190,6 @@ var regionConfigs = map[string]regionConfig{
 			Exchange:       []string{"Exchange"},
 			Currency:       []string{"Currency"},
 			MarketCurrency: []string{"Market Currency"},
-			FXRate:         []string{"FX Rate"},
-			Type:           []string{"Type"},
 		},
 	},
 	"fr": {
@@ -254,7 +243,6 @@ var regionConfigs = map[string]regionConfig{
 			ISIN:           []string{"ISIN"},
 			MarketValue:    []string{"Market Value"},
 			Weight:         []string{"Weight (%)", "Market Weight"},
-			NotionalValue:  []string{"Notional Value", "Notional Weight"},
 			Quantity:       []string{"Shares", "Quantity"},
 			Price:          []string{"Price"},
 			Sector:         []string{"Sector"},
@@ -263,8 +251,6 @@ var regionConfigs = map[string]regionConfig{
 			Exchange:       []string{"Exchange"},
 			Currency:       []string{"Currency"},
 			MarketCurrency: []string{"Market Currency"},
-			FXRate:         []string{"FX Rate"},
-			Type:           []string{"Type"},
 		},
 	},
 }

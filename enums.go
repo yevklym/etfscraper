@@ -74,31 +74,6 @@ const (
 	SectorRealEstate            Sector = "Real Estate"
 )
 
-// Location constants
-const (
-	LocationUSA         Location = "USA"
-	LocationCanada      Location = "Canada"
-	LocationUK          Location = "United Kingdom"
-	LocationGermany     Location = "Germany"
-	LocationFrance      Location = "France"
-	LocationItaly       Location = "Italy"
-	LocationSpain       Location = "Spain"
-	LocationNetherlands Location = "Netherlands"
-	LocationSwitzerland Location = "Switzerland"
-	LocationJapan       Location = "Japan"
-	LocationChina       Location = "China"
-	LocationHongKong    Location = "Hong Kong"
-	LocationSouthKorea  Location = "South Korea"
-	LocationIndia       Location = "India"
-	LocationAustralia   Location = "Australia"
-	LocationBrazil      Location = "Brazil"
-	LocationMexico      Location = "Mexico"
-	LocationSouthAfrica Location = "South Africa"
-	LocationEmerging    Location = "Emerging Markets"
-	LocationDeveloped   Location = "Developed Markets"
-	LocationGlobal      Location = "Global"
-)
-
 const (
 	ProviderIShares ProviderName = "iShares"
 	ProviderAmundi  ProviderName = "Amundi"

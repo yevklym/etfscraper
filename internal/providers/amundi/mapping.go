@@ -6,7 +6,7 @@ import (
 	"github.com/yevklym/etfscraper"
 )
 
-type amundiFundMetadata struct {
+type fundMetadata struct {
 	ProductID     string
 	MainListings  map[string]string
 	FundIssuer    string
