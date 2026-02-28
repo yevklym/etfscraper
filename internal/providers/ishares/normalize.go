@@ -38,6 +38,20 @@ func normalizeCurrency(value string) etfscraper.Currency {
 	}
 }
 
+// normalizeAssetClass maps an aladdinAssetClass value to a canonical AssetClass
+func normalizeAssetClass(value string, mapping map[string]etfscraper.AssetClass) etfscraper.AssetClass {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" || trimmed == "-" {
+		return ""
+	}
+
+	if ac, ok := mapping[strings.ToLower(trimmed)]; ok {
+		return ac
+	}
+
+	return etfscraper.AssetClass(trimmed)
+}
+
 func normalizeExchange(value string) etfscraper.Exchange {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" || trimmed == "-" {
