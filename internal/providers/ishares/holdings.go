@@ -115,6 +115,7 @@ func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscr
 
 		holding, err := c.parseHoldingRecord(record, resolver)
 		if err != nil {
+			log.Printf("Warning: skipping holding record: %v", err)
 			continue
 		}
 
@@ -122,7 +123,7 @@ func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscr
 	}
 
 	if len(holdings) == 0 {
-		return nil, fmt.Errorf("no holdings found for fund %s", fund.Ticker)
+		return nil, fmt.Errorf("%w: fund %s", etfscraper.ErrHoldingsUnavailable, fund.Ticker)
 	}
 
 	return &etfscraper.HoldingsSnapshot{

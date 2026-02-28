@@ -68,6 +68,7 @@ var regionConfigs = map[string]regionConfig{
 		DiscoveryPath: "/mapi/ProductAPI/getProductsData",
 		HoldingsPath:  "/mapi/ProductAPI/getProductsData",
 		CountryCode:   "GBR",
+		CountryName:   "United Kingdom",
 		LanguageCode:  "en",
 		LanguageName:  "English",
 		DefaultHeaders: map[string]string{
@@ -107,6 +108,7 @@ var regionConfigs = map[string]regionConfig{
 		DiscoveryPath: "/mapi/ProductAPI/getProductsData",
 		HoldingsPath:  "/mapi/ProductAPI/getProductsData",
 		CountryCode:   "FRA",
+		CountryName:   "France",
 		LanguageCode:  "en",
 		LanguageName:  "English",
 		DefaultHeaders: map[string]string{
