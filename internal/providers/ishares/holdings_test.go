@@ -116,3 +116,80 @@ Name,Market Value,Weight (%),Quantity
 		t.Errorf("Expected quantity 253795.0, got %f", asml.Quantity)
 	}
 }
+
+func TestParseHoldings_FrenchFormat(t *testing.T) {
+	csvData := "iShares S&P 500 (Acc)\n" +
+		"Fund Holdings as of,\"26/f\u00e9vr./2026\"\n" +
+		"Inception Date,\"15/sept./2010\"\n" +
+		"Shares Outstanding,\"100 000 000,00\"\n" +
+		"\n" +
+		"Ticker,Name,Sector,Asset Class,Market Value,Weight (%),Notional Value,Shares,Price,Location,Exchange,Market Currency\n" +
+		"\"NVDA\",\"NVIDIA CORP\",\"Technologie de l'information\",\"Actions\",\"10 569 831 271,35\",\"7,60\",\"10 569 831 271,35\",\"57 168 215,00\",\"184,89\",\"Etats-Unis\",\"NASDAQ\",\"USD\"\n" +
+		"\"AAPL\",\"APPLE INC\",\"Technologie de l'information\",\"Actions\",\"9 488 522 637,00\",\"6,82\",\"9 488 522 637,00\",\"34 762 860,00\",\"272,95\",\"Etats-Unis\",\"NASDAQ\",\"USD\"\n" +
+		"\"MSFT\",\"MICROSOFT CORP\",\"Technologie de l'information\",\"Actions\",\"7 024 245 332,72\",\"5,05\",\"7 024 245 332,72\",\"17 485 426,00\",\"401,72\",\"Etats-Unis\",\"NASDAQ\",\"USD\"\n" +
+		"\n" +
+		"\"The content contained herein...\""
+
+	c, err := New("fr")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	fund := &etfscraper.Fund{Ticker: "CSPX", Name: "iShares S&P 500 (Acc)"}
+
+	snapshot, err := c.parseHoldings(strings.NewReader(csvData), fund)
+	if err != nil {
+		t.Fatalf("parseHoldings failed: %v", err)
+	}
+
+	expectedDate := time.Date(2026, time.February, 26, 0, 0, 0, 0, time.UTC)
+	if !snapshot.AsOfDate.Equal(expectedDate) {
+		t.Errorf("Expected AsOfDate %v, got %v", expectedDate, snapshot.AsOfDate)
+	}
+
+	if snapshot.TotalHoldings != 3 {
+		t.Errorf("Expected 3 holdings, got %d", snapshot.TotalHoldings)
+	}
+
+	nvidia := snapshot.Holdings[0]
+	if nvidia.Ticker != "NVDA" {
+		t.Errorf("Expected first ticker NVDA, got %s", nvidia.Ticker)
+	}
+	if nvidia.Name != "NVIDIA CORP" {
+		t.Errorf("Expected name NVIDIA CORP, got %s", nvidia.Name)
+	}
+	if nvidia.Sector != "Technologie de l'information" {
+		t.Errorf("Expected sector Technologie de l'information, got %s", nvidia.Sector)
+	}
+	if nvidia.AssetClass != "Actions" {
+		t.Errorf("Expected asset class Actions, got %s", nvidia.AssetClass)
+	}
+	if nvidia.Location != "Etats-Unis" {
+		t.Errorf("Expected location Etats-Unis, got %s", nvidia.Location)
+	}
+	if nvidia.Currency != etfscraper.CurrencyUSD {
+		t.Errorf("Expected currency USD, got %s", nvidia.Currency)
+	}
+
+	epsilon := 0.01
+	if diff := nvidia.MarketValue - 10569831271.35; diff > epsilon || diff < -epsilon {
+		t.Errorf("Expected market value 10569831271.35, got %f", nvidia.MarketValue)
+	}
+
+	if diff := nvidia.Weight - 0.076; diff > 0.001 || diff < -0.001 {
+		t.Errorf("Expected weight ~0.076, got %f", nvidia.Weight)
+	}
+
+	if diff := nvidia.Quantity - 57168215.0; diff > epsilon || diff < -epsilon {
+		t.Errorf("Expected quantity 57168215.0, got %f", nvidia.Quantity)
+	}
+
+	if diff := nvidia.Price - 184.89; diff > epsilon || diff < -epsilon {
+		t.Errorf("Expected price 184.89, got %f", nvidia.Price)
+	}
+
+	msft := snapshot.Holdings[2]
+	if msft.Ticker != "MSFT" {
+		t.Errorf("Expected third ticker MSFT, got %s", msft.Ticker)
+	}
+}

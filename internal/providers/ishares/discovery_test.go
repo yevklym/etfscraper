@@ -95,6 +95,36 @@ func TestConvertSingleFund(t *testing.T) {
 	}
 }
 
+func TestConvertSingleFund_TrimsTickerWhitespace(t *testing.T) {
+	c := &Client{config: regionConfigs["fr"]}
+
+	tests := []struct {
+		name   string
+		ticker string
+		want   string
+	}{
+		{"trailing NBSP", "EDMW\u00A0", "EDMW"},
+		{"trailing space and NBSP", "CEMA \u00A0", "CEMA"},
+		{"multiple NBSP", "EDMJ\u00A0\u00A0", "EDMJ"},
+		{"clean ticker", "CSPX", "CSPX"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			input := ISharesETFData{
+				LocalExchangeTicker: tt.ticker,
+				FundName:            "Test Fund",
+				ISIN:                "IE0000000001",
+				ProductView:         []string{"all", "ishares"},
+			}
+			fund := c.convertSingleFund(input)
+			if fund.Ticker != tt.want {
+				t.Errorf("expected ticker %q, got %q", tt.want, fund.Ticker)
+			}
+		})
+	}
+}
+
 func TestDiscoverETFs_WrapperFormat(t *testing.T) {
 	sampleJSON := `{
 		"i": {
@@ -127,6 +157,38 @@ func TestDiscoverETFs_WrapperFormat(t *testing.T) {
 	}
 	if funds[0].Ticker != "MCHI" {
 		t.Fatalf("expected ticker MCHI, got %q", funds[0].Ticker)
+	}
+}
+
+func TestDiscoverETFs_ProductViewFormat(t *testing.T) {
+	sampleJSON := `{
+		"344146": {
+			"fundName": "iShares Global Corp Bond UCITS ETF",
+			"localExchangeTicker": "CEMD",
+			"isin": "IE000PLCL3C9",
+			"exchange": "Xetra",
+			"portfolioId": 344146,
+			"productPageUrl": "/fr/particuliers/products/344146/ishares-global-corp-bond-ucits-etf",
+			"productView": ["all", "ishares"]
+		}
+	}`
+
+	mockClient := &testutil.MockHTTPClient{
+		ResponseBody: sampleJSON,
+		StatusCode:   http.StatusOK,
+	}
+
+	c, _ := New("fr", WithHTTPClient(mockClient))
+
+	funds, err := c.DiscoverETFs(context.Background())
+	if err != nil {
+		t.Fatalf("DiscoverETFs failed: %v", err)
+	}
+	if len(funds) != 1 {
+		t.Fatalf("expected 1 fund, got %d", len(funds))
+	}
+	if funds[0].Ticker != "CEMD" {
+		t.Fatalf("expected ticker CEMD, got %q", funds[0].Ticker)
 	}
 }
 

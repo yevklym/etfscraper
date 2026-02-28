@@ -240,6 +240,21 @@ func TestColumnResolver_NormalizeNumber(t *testing.T) {
 			input: "-123.45",
 			want:  "-123.45",
 		},
+		{
+			name:  "French format with spaces and comma decimal",
+			input: "10 569 831 271,35",
+			want:  "10569831271.35",
+		},
+		{
+			name:  "non-breaking spaces",
+			input: "10\u00A0569\u00A0831\u00A0271,35",
+			want:  "10569831271.35",
+		},
+		{
+			name:  "narrow no-break spaces",
+			input: "10\u202F569\u202F831\u202F271,35",
+			want:  "10569831271.35",
+		},
 	}
 
 	for _, tt := range tests {

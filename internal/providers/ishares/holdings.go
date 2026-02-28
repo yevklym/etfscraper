@@ -55,6 +55,9 @@ func (c *Client) generateHoldingsURL(fund etfscraper.Fund) (string, error) {
 	}
 
 	if metadata.ProductPageURL != "" {
+		if strings.TrimSpace(c.config.HoldingsURLTemplate) == "" {
+			return "", fmt.Errorf("holdings not configured for region %s", c.region)
+		}
 		return fmt.Sprintf(c.config.HoldingsURLTemplate,
 			c.config.BaseURL,
 			metadata.ProductPageURL), nil
