@@ -158,11 +158,11 @@ func TestParseHoldings_FrenchFormat(t *testing.T) {
 	if nvidia.Name != "NVIDIA CORP" {
 		t.Errorf("Expected name NVIDIA CORP, got %s", nvidia.Name)
 	}
-	if nvidia.Sector != "Technologie de l'information" {
-		t.Errorf("Expected sector Technologie de l'information, got %s", nvidia.Sector)
+	if nvidia.Sector != etfscraper.SectorInformationTechnology {
+		t.Errorf("Expected sector %s, got %s", etfscraper.SectorInformationTechnology, nvidia.Sector)
 	}
-	if nvidia.AssetClass != "Actions" {
-		t.Errorf("Expected asset class Actions, got %s", nvidia.AssetClass)
+	if nvidia.AssetClass != etfscraper.AssetClassEquity {
+		t.Errorf("Expected asset class %s, got %s", etfscraper.AssetClassEquity, nvidia.AssetClass)
 	}
 	if nvidia.Location != "Etats-Unis" {
 		t.Errorf("Expected location Etats-Unis, got %s", nvidia.Location)

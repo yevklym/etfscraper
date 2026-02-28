@@ -211,8 +211,8 @@ func (c *Client) extractOptionalFields(holding *etfscraper.Holding, record []str
 	}{
 		{c.config.ColumnMappings.Ticker, func(v string) { holding.Ticker = v }},
 		{c.config.ColumnMappings.ISIN, func(v string) { holding.ISIN = v }},
-		{c.config.ColumnMappings.Sector, func(v string) { holding.Sector = etfscraper.Sector(v) }},
-		{c.config.ColumnMappings.AssetClass, func(v string) { holding.AssetClass = etfscraper.AssetClass(v) }},
+		{c.config.ColumnMappings.Sector, func(v string) { holding.Sector = normalizeSector(v, c.config.SectorMapping) }},
+		{c.config.ColumnMappings.AssetClass, func(v string) { holding.AssetClass = normalizeAssetClass(v, c.config.AssetClassMapping) }},
 		{c.config.ColumnMappings.Location, func(v string) { holding.Location = etfscraper.Location(v) }},
 		{c.config.ColumnMappings.Exchange, func(v string) { holding.Exchange = normalizeExchange(v) }},
 	}
