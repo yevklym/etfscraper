@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/yevklym/etfscraper"
@@ -52,6 +53,7 @@ type ISharesETFData struct {
 	AladdinRegion      string           `json:"aladdinRegion"`
 	SeriesBaseCurrency string           `json:"seriesBaseCurrency"`
 	Exchange           string           `json:"exchange"`
+	ProductView        []string         `json:"productView"`
 }
 
 type iSharesFundMetadata struct {
@@ -126,7 +128,7 @@ func (c *Client) convertToFunds(etfData map[string]ISharesETFData) []etfscraper.
 }
 
 func (c *Client) isValidETF(data ISharesETFData) bool {
-	if data.ProductType != "ISHARES_FUND_DATA" {
+	if data.ProductType != "ISHARES_FUND_DATA" && !hasISharesProductView(data.ProductView) {
 		return false
 	}
 
@@ -141,6 +143,15 @@ func (c *Client) isValidETF(data ISharesETFData) bool {
 	}
 
 	return true
+}
+
+func hasISharesProductView(values []string) bool {
+	for _, value := range values {
+		if strings.EqualFold(strings.TrimSpace(value), "ishares") {
+			return true
+		}
+	}
+	return false
 }
 
 func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {

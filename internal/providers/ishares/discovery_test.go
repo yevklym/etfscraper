@@ -130,6 +130,38 @@ func TestDiscoverETFs_WrapperFormat(t *testing.T) {
 	}
 }
 
+func TestDiscoverETFs_ProductViewFormat(t *testing.T) {
+	sampleJSON := `{
+		"344146": {
+			"fundName": "iShares Global Corp Bond UCITS ETF",
+			"localExchangeTicker": "CEMD",
+			"isin": "IE000PLCL3C9",
+			"exchange": "Xetra",
+			"portfolioId": 344146,
+			"productPageUrl": "/fr/particuliers/products/344146/ishares-global-corp-bond-ucits-etf",
+			"productView": ["all", "ishares"]
+		}
+	}`
+
+	mockClient := &testutil.MockHTTPClient{
+		ResponseBody: sampleJSON,
+		StatusCode:   http.StatusOK,
+	}
+
+	c, _ := New("fr", WithHTTPClient(mockClient))
+
+	funds, err := c.DiscoverETFs(context.Background())
+	if err != nil {
+		t.Fatalf("DiscoverETFs failed: %v", err)
+	}
+	if len(funds) != 1 {
+		t.Fatalf("expected 1 fund, got %d", len(funds))
+	}
+	if funds[0].Ticker != "CEMD" {
+		t.Fatalf("expected ticker CEMD, got %q", funds[0].Ticker)
+	}
+}
+
 func TestConvertSingleFund_RegionDefaults(t *testing.T) {
 	input := ISharesETFData{
 		PortfolioID:         12345,
