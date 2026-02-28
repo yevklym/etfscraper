@@ -121,7 +121,7 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 
 	holdings := c.convertHoldings(composition, fund.TotalAssets)
 	if len(holdings) == 0 {
-		return nil, fmt.Errorf("no holdings found for fund %s", fund.Ticker)
+		return nil, fmt.Errorf("%w: fund %s", etfscraper.ErrHoldingsUnavailable, fund.Ticker)
 	}
 
 	return &etfscraper.HoldingsSnapshot{
