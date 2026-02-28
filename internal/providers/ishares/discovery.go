@@ -107,7 +107,7 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 }
 
 func (c *Client) convertToFunds(etfData map[string]etfData) []etfscraper.Fund {
-	var funds []etfscraper.Fund
+	funds := make([]etfscraper.Fund, 0, len(etfData))
 
 	for _, data := range etfData {
 		// Skip mutual funds - only process ETFs
