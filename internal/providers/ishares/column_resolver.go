@@ -69,6 +69,8 @@ func (r *columnResolver) normalizeNumber(s string) string {
 	s = strings.TrimSpace(s)
 
 	s = strings.ReplaceAll(s, " ", "")
+	s = strings.ReplaceAll(s, "\u00A0", "") // non-breaking space (French locale)
+	s = strings.ReplaceAll(s, "\u202F", "") // narrow no-break space (French locale)
 	s = strings.ReplaceAll(s, "$", "")
 	s = strings.ReplaceAll(s, "€", "")
 	s = strings.ReplaceAll(s, "'", "") // Swiss thousands separator
