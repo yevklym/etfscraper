@@ -13,6 +13,7 @@ type regionConfig struct {
 	DefaultCurrency     etfscraper.Currency
 	DefaultExchange     etfscraper.Exchange
 	AssetClassMapping   map[string]etfscraper.AssetClass
+	SectorMapping       map[string]etfscraper.Sector
 	ColumnMappings      ColumnMapper
 	MonthTranslations   map[string]string
 	DateFormats         []string
@@ -55,6 +56,19 @@ var regionConfigs = map[string]regionConfig{
 			"digital assets": etfscraper.AssetClassCryptocurrency,
 			"multi asset":    etfscraper.AssetClassAlternative,
 		},
+		SectorMapping: map[string]etfscraper.Sector{
+			"energy":                 etfscraper.SectorEnergy,
+			"materials":              etfscraper.SectorMaterials,
+			"industrials":            etfscraper.SectorIndustrials,
+			"consumer discretionary": etfscraper.SectorConsumerDiscretionary,
+			"consumer staples":       etfscraper.SectorConsumerStaples,
+			"health care":            etfscraper.SectorHealthcare,
+			"financials":             etfscraper.SectorFinancials,
+			"information technology": etfscraper.SectorInformationTechnology,
+			"communication":          etfscraper.SectorTelecommunication,
+			"utilities":              etfscraper.SectorUtilities,
+			"real estate":            etfscraper.SectorRealEstate,
+		},
 		MonthTranslations:  nil,
 		DateFormats:        []string{"Jan 2, 2006"},
 		DateHeaderPatterns: []string{"Fund Holdings as of"},
@@ -91,6 +105,19 @@ var regionConfigs = map[string]regionConfig{
 			"immobilien":     etfscraper.AssetClassRealEstate,
 			"digital assets": etfscraper.AssetClassCryptocurrency,
 			"multi-asset":    etfscraper.AssetClassAlternative,
+		},
+		SectorMapping: map[string]etfscraper.Sector{
+			"energie":                    etfscraper.SectorEnergy,
+			"materialien":                etfscraper.SectorMaterials,
+			"industrie":                  etfscraper.SectorIndustrials,
+			"zyklische konsumgüter":      etfscraper.SectorConsumerDiscretionary,
+			"nichtzyklische konsumgüter": etfscraper.SectorConsumerStaples,
+			"gesundheitsversorgung":      etfscraper.SectorHealthcare,
+			"financials":                 etfscraper.SectorFinancials,
+			"it":                         etfscraper.SectorInformationTechnology,
+			"kommunikation":              etfscraper.SectorTelecommunication,
+			"versorger":                  etfscraper.SectorUtilities,
+			"immobilien":                 etfscraper.SectorRealEstate,
 		},
 		MonthTranslations: map[string]string{
 			"Jan": "Jan",
@@ -141,6 +168,19 @@ var regionConfigs = map[string]regionConfig{
 			"digital assets": etfscraper.AssetClassCryptocurrency,
 			"multi asset":    etfscraper.AssetClassAlternative,
 		},
+		SectorMapping: map[string]etfscraper.Sector{
+			"energy":                 etfscraper.SectorEnergy,
+			"materials":              etfscraper.SectorMaterials,
+			"industrials":            etfscraper.SectorIndustrials,
+			"consumer discretionary": etfscraper.SectorConsumerDiscretionary,
+			"consumer staples":       etfscraper.SectorConsumerStaples,
+			"health care":            etfscraper.SectorHealthcare,
+			"financials":             etfscraper.SectorFinancials,
+			"information technology": etfscraper.SectorInformationTechnology,
+			"communication":          etfscraper.SectorTelecommunication,
+			"utilities":              etfscraper.SectorUtilities,
+			"real estate":            etfscraper.SectorRealEstate,
+		},
 		MonthTranslations:  nil,
 		DateFormats:        []string{"02/Jan/2006"},
 		DateHeaderPatterns: []string{"Fund Holdings as of"},
@@ -178,6 +218,19 @@ var regionConfigs = map[string]regionConfig{
 			"digital assets":     etfscraper.AssetClassCryptocurrency,
 			"multi-actifs":       etfscraper.AssetClassAlternative,
 			"marchés privés":     etfscraper.AssetClassAlternative,
+		},
+		SectorMapping: map[string]etfscraper.Sector{
+			"energie":                         etfscraper.SectorEnergy,
+			"matériaux":                       etfscraper.SectorMaterials,
+			"industries":                      etfscraper.SectorIndustrials,
+			"biens de consommation cycliques": etfscraper.SectorConsumerDiscretionary,
+			"biens de consommation de base":   etfscraper.SectorConsumerStaples,
+			"santé":                           etfscraper.SectorHealthcare,
+			"finance":                         etfscraper.SectorFinancials,
+			"technologie de l'information":    etfscraper.SectorInformationTechnology,
+			"la communication":                etfscraper.SectorTelecommunication,
+			"services publics":                etfscraper.SectorUtilities,
+			"immobilier":                      etfscraper.SectorRealEstate,
 		},
 		MonthTranslations: map[string]string{
 			"janv.": "Jan",

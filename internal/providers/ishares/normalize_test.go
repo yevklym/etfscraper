@@ -87,6 +87,80 @@ func TestNormalizeAssetClass_AllRegions(t *testing.T) {
 	}
 }
 
+func TestNormalizeSector_AllRegions(t *testing.T) {
+	tests := []struct {
+		name     string
+		region   string
+		input    string
+		expected etfscraper.Sector
+	}{
+		// English (US)
+		{name: "energy us", region: "us", input: "Energy", expected: etfscraper.SectorEnergy},
+		{name: "materials us", region: "us", input: "Materials", expected: etfscraper.SectorMaterials},
+		{name: "industrials us", region: "us", input: "Industrials", expected: etfscraper.SectorIndustrials},
+		{name: "consumer discretionary us", region: "us", input: "Consumer Discretionary", expected: etfscraper.SectorConsumerDiscretionary},
+		{name: "consumer staples us", region: "us", input: "Consumer Staples", expected: etfscraper.SectorConsumerStaples},
+		{name: "health care us", region: "us", input: "Health Care", expected: etfscraper.SectorHealthcare},
+		{name: "financials us", region: "us", input: "Financials", expected: etfscraper.SectorFinancials},
+		{name: "information technology us", region: "us", input: "Information Technology", expected: etfscraper.SectorInformationTechnology},
+		{name: "communication us", region: "us", input: "Communication", expected: etfscraper.SectorTelecommunication},
+		{name: "utilities us", region: "us", input: "Utilities", expected: etfscraper.SectorUtilities},
+		{name: "real estate us", region: "us", input: "Real Estate", expected: etfscraper.SectorRealEstate},
+
+		// English (UK)
+		{name: "energy uk", region: "uk", input: "Energy", expected: etfscraper.SectorEnergy},
+		{name: "health care uk", region: "uk", input: "Health Care", expected: etfscraper.SectorHealthcare},
+		{name: "communication uk", region: "uk", input: "Communication", expected: etfscraper.SectorTelecommunication},
+
+		// German (DE)
+		{name: "energy german", region: "de", input: "Energie", expected: etfscraper.SectorEnergy},
+		{name: "materials german", region: "de", input: "Materialien", expected: etfscraper.SectorMaterials},
+		{name: "industrials german", region: "de", input: "Industrie", expected: etfscraper.SectorIndustrials},
+		{name: "consumer discretionary german", region: "de", input: "Zyklische Konsumgüter", expected: etfscraper.SectorConsumerDiscretionary},
+		{name: "consumer staples german", region: "de", input: "Nichtzyklische Konsumgüter", expected: etfscraper.SectorConsumerStaples},
+		{name: "healthcare german", region: "de", input: "Gesundheitsversorgung", expected: etfscraper.SectorHealthcare},
+		{name: "financials german", region: "de", input: "Financials", expected: etfscraper.SectorFinancials},
+		{name: "it german", region: "de", input: "IT", expected: etfscraper.SectorInformationTechnology},
+		{name: "communication german", region: "de", input: "Kommunikation", expected: etfscraper.SectorTelecommunication},
+		{name: "utilities german", region: "de", input: "Versorger", expected: etfscraper.SectorUtilities},
+		{name: "real estate german", region: "de", input: "Immobilien", expected: etfscraper.SectorRealEstate},
+
+		// French (FR)
+		{name: "energy french", region: "fr", input: "Energie", expected: etfscraper.SectorEnergy},
+		{name: "materials french", region: "fr", input: "Matériaux", expected: etfscraper.SectorMaterials},
+		{name: "industrials french", region: "fr", input: "Industries", expected: etfscraper.SectorIndustrials},
+		{name: "consumer discretionary french", region: "fr", input: "Biens de consommation cycliques", expected: etfscraper.SectorConsumerDiscretionary},
+		{name: "consumer staples french", region: "fr", input: "Biens de consommation de base", expected: etfscraper.SectorConsumerStaples},
+		{name: "healthcare french", region: "fr", input: "Santé", expected: etfscraper.SectorHealthcare},
+		{name: "financials french", region: "fr", input: "Finance", expected: etfscraper.SectorFinancials},
+		{name: "information technology french", region: "fr", input: "Technologie de l'information", expected: etfscraper.SectorInformationTechnology},
+		{name: "communication french", region: "fr", input: "La communication", expected: etfscraper.SectorTelecommunication},
+		{name: "utilities french", region: "fr", input: "Services publics", expected: etfscraper.SectorUtilities},
+		{name: "real estate french", region: "fr", input: "Immobilier", expected: etfscraper.SectorRealEstate},
+
+		// Edge cases
+		{name: "empty string", region: "us", input: "", expected: ""},
+		{name: "dash", region: "us", input: "-", expected: ""},
+		{name: "whitespace", region: "us", input: "  Energy  ", expected: etfscraper.SectorEnergy},
+		{name: "case insensitive", region: "us", input: "HEALTH CARE", expected: etfscraper.SectorHealthcare},
+		{name: "unknown passthrough", region: "us", input: "Cash and/or Derivatives", expected: etfscraper.Sector("Cash and/or Derivatives")},
+		{name: "nil mapping", region: "", input: "Energy", expected: etfscraper.Sector("Energy")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var mapping map[string]etfscraper.Sector
+			if cfg, ok := regionConfigs[tt.region]; ok {
+				mapping = cfg.SectorMapping
+			}
+			got := normalizeSector(tt.input, mapping)
+			if got != tt.expected {
+				t.Errorf("normalizeSector(%q) = %q, want %q", tt.input, got, tt.expected)
+			}
+		})
+	}
+}
+
 func TestNormalizeExchange_CommonMappings(t *testing.T) {
 	tests := []struct {
 		name     string

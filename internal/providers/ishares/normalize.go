@@ -52,6 +52,20 @@ func normalizeAssetClass(value string, mapping map[string]etfscraper.AssetClass)
 	return etfscraper.AssetClass(trimmed)
 }
 
+// normalizeSector maps a locale-specific sector value to a canonical Sector
+func normalizeSector(value string, mapping map[string]etfscraper.Sector) etfscraper.Sector {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" || trimmed == "-" {
+		return ""
+	}
+
+	if s, ok := mapping[strings.ToLower(trimmed)]; ok {
+		return s
+	}
+
+	return etfscraper.Sector(trimmed)
+}
+
 func normalizeExchange(value string) etfscraper.Exchange {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" || trimmed == "-" {
