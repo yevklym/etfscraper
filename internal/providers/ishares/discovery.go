@@ -180,6 +180,7 @@ func (c *Client) convertSingleFund(data ISharesETFData) etfscraper.Fund {
 		Name:         data.FundName,
 		ISIN:         data.ISIN,
 		Provider:     etfscraper.ProviderIShares,
+		AssetClass:   normalizeAssetClass(data.AladdinAssetClass, c.config.AssetClassMapping),
 		Currency:     currency,
 		ExpenseRatio: expenseRatio,
 		TotalAssets:  data.TotalNetAssets.Raw,

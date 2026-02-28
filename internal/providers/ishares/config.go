@@ -12,6 +12,7 @@ type regionConfig struct {
 	HoldingsURLTemplate string
 	DefaultCurrency     etfscraper.Currency
 	DefaultExchange     etfscraper.Exchange
+	AssetClassMapping   map[string]etfscraper.AssetClass
 	ColumnMappings      ColumnMapper
 	MonthTranslations   map[string]string
 	DateFormats         []string
@@ -45,9 +46,18 @@ var regionConfigs = map[string]regionConfig{
 		HoldingsURLTemplate: "%s%s/1467271812596.ajax?fileType=csv",
 		DefaultCurrency:     etfscraper.CurrencyUSD,
 		DefaultExchange:     etfscraper.ExchangeNYSE,
-		MonthTranslations:   nil,
-		DateFormats:         []string{"Jan 2, 2006"},
-		DateHeaderPatterns:  []string{"Fund Holdings as of"},
+		AssetClassMapping: map[string]etfscraper.AssetClass{
+			"equity":         etfscraper.AssetClassEquity,
+			"fixed income":   etfscraper.AssetClassBond,
+			"cash":           etfscraper.AssetClassCash,
+			"commodity":      etfscraper.AssetClassCommodity,
+			"real estate":    etfscraper.AssetClassRealEstate,
+			"digital assets": etfscraper.AssetClassCryptocurrency,
+			"multi asset":    etfscraper.AssetClassAlternative,
+		},
+		MonthTranslations:  nil,
+		DateFormats:        []string{"Jan 2, 2006"},
+		DateHeaderPatterns: []string{"Fund Holdings as of"},
 		ColumnMappings: ColumnMapper{
 			Name:           []string{"Name"},
 			Ticker:         []string{"Ticker"},
@@ -73,6 +83,15 @@ var regionConfigs = map[string]regionConfig{
 		HoldingsURLTemplate: "%s%s/fund/1478358465952.ajax?fileType=csv",
 		DefaultCurrency:     etfscraper.CurrencyEUR,
 		DefaultExchange:     etfscraper.ExchangeXetra,
+		AssetClassMapping: map[string]etfscraper.AssetClass{
+			"aktien":         etfscraper.AssetClassEquity,
+			"anleihen":       etfscraper.AssetClassBond,
+			"barmittel":      etfscraper.AssetClassCash,
+			"rohstoffe":      etfscraper.AssetClassCommodity,
+			"immobilien":     etfscraper.AssetClassRealEstate,
+			"digital assets": etfscraper.AssetClassCryptocurrency,
+			"multi-asset":    etfscraper.AssetClassAlternative,
+		},
 		MonthTranslations: map[string]string{
 			"Jan": "Jan",
 			"Feb": "Feb",
@@ -113,9 +132,18 @@ var regionConfigs = map[string]regionConfig{
 		HoldingsURLTemplate: "%s%s/fund/1506575576011.ajax?fileType=csv",
 		DefaultCurrency:     etfscraper.CurrencyGBP,
 		DefaultExchange:     etfscraper.ExchangeLSE,
-		MonthTranslations:   nil,
-		DateFormats:         []string{"02/Jan/2006"},
-		DateHeaderPatterns:  []string{"Fund Holdings as of"},
+		AssetClassMapping: map[string]etfscraper.AssetClass{
+			"equity":         etfscraper.AssetClassEquity,
+			"fixed income":   etfscraper.AssetClassBond,
+			"cash":           etfscraper.AssetClassCash,
+			"commodity":      etfscraper.AssetClassCommodity,
+			"real estate":    etfscraper.AssetClassRealEstate,
+			"digital assets": etfscraper.AssetClassCryptocurrency,
+			"multi asset":    etfscraper.AssetClassAlternative,
+		},
+		MonthTranslations:  nil,
+		DateFormats:        []string{"02/Jan/2006"},
+		DateHeaderPatterns: []string{"Fund Holdings as of"},
 		ColumnMappings: ColumnMapper{
 			Name:           []string{"Name"},
 			Ticker:         []string{"Ticker"},
@@ -141,6 +169,16 @@ var regionConfigs = map[string]regionConfig{
 		HoldingsURLTemplate: "%s%s/1499538099380.ajax?fileType=csv",
 		DefaultCurrency:     etfscraper.CurrencyEUR,
 		DefaultExchange:     etfscraper.ExchangeEuronext,
+		AssetClassMapping: map[string]etfscraper.AssetClass{
+			"actions":            etfscraper.AssetClassEquity,
+			"obligations":        etfscraper.AssetClassBond,
+			"liquidités":         etfscraper.AssetClassCash,
+			"matières premières": etfscraper.AssetClassCommodity,
+			"immobilier":         etfscraper.AssetClassRealEstate,
+			"digital assets":     etfscraper.AssetClassCryptocurrency,
+			"multi-actifs":       etfscraper.AssetClassAlternative,
+			"marchés privés":     etfscraper.AssetClassAlternative,
+		},
 		MonthTranslations: map[string]string{
 			"janv.": "Jan",
 			"févr.": "Feb",
