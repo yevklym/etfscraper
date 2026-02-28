@@ -65,7 +65,7 @@ func (c *Client) discoverFresh(ctx context.Context) ([]etfscraper.Fund, error) {
 
 	resp, err := c.doPost(ctx, url, body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch discovery data: %w", err)
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
@@ -77,7 +77,7 @@ func (c *Client) discoverFresh(ctx context.Context) ([]etfscraper.Fund, error) {
 		if c.httpConfig.Debug {
 			log.Printf("amundi: discovery response %s", resp.Status)
 		}
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
+		return nil, fmt.Errorf("amundi: discovery: HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
 
 	var payload productsResponse

@@ -17,7 +17,7 @@ import (
 func (c *Client) Holdings(ctx context.Context, identifier string) (*etfscraper.HoldingsSnapshot, error) {
 	fund, err := c.FundInfo(ctx, identifier)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ishares: holdings: %w", err)
 	}
 	return c.HoldingsForFund(ctx, fund)
 }
@@ -29,17 +29,17 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 
 	url, err := c.generateHoldingsURL(*fund)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ishares: holdings: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ishares: holdings: failed to create request: %w", err)
 	}
 
 	resp, err := c.httpConfig.Client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ishares: holdings: request failed: %w", err)
 	}
 
 	defer func() {
@@ -49,7 +49,7 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
+		return nil, fmt.Errorf("ishares: holdings: HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
 
 	return c.parseHoldings(resp.Body, fund)
@@ -81,13 +81,13 @@ func (c *Client) parseHoldings(reader io.Reader, fund *etfscraper.Fund) (*etfscr
 	// Find and parse the "as of" date
 	asOfDate, err := c.findAndParseDate(csvReader)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to find date header: %w", err)
 	}
 
 	// Find and parse the data header row
 	headerRow, err := c.findHeaderRow(csvReader)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to find data header: %w", err)
 	}
 
 	resolver := newColumnResolver(headerRow, c.config.ColumnMappings)
@@ -294,7 +294,7 @@ func (c *Client) findAndParseDate(csvReader *csv.Reader) (time.Time, error) {
 	for {
 		record, err := csvReader.Read()
 		if err == io.EOF {
-			return time.Time{}, fmt.Errorf("CSV ended before date header was found")
+			return time.Time{}, fmt.Errorf("csv ended before date header was found")
 		}
 		if err != nil {
 			return time.Time{}, fmt.Errorf("error reading CSV header: %w", err)
@@ -338,7 +338,7 @@ func (c *Client) findHeaderRow(csvReader *csv.Reader) ([]string, error) {
 	for {
 		record, err := csvReader.Read()
 		if err == io.EOF {
-			return nil, fmt.Errorf("CSV ended before data header was found")
+			return nil, fmt.Errorf("csv ended before data header was found")
 		}
 		if err != nil {
 			return nil, fmt.Errorf("error while searching for CSV header: %w", err)

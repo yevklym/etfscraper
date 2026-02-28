@@ -23,7 +23,7 @@ func (f *isharesDataField) UnmarshalJSON(data []byte) error {
 		type Alias isharesDataField
 		var aux Alias
 		if err := json.Unmarshal(data, &aux); err != nil {
-			return err
+			return fmt.Errorf("failed to unmarshal data field: %w", err)
 		}
 		*f = isharesDataField(aux)
 	}
@@ -67,12 +67,12 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 	}
 	req, err := http.NewRequestWithContext(ctx, "GET", c.config.DiscoveryURL, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	resp, err := c.httpConfig.Client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("request failed: %w", err)
 	}
 
 	// Only defer if resp is not nil
@@ -86,7 +86,7 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 		if c.httpConfig.Debug {
 			log.Printf("ishares: discovery response %s", resp.Status)
 		}
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
+		return nil, fmt.Errorf("ishares: discovery: HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
 
 	body, err := io.ReadAll(resp.Body)
