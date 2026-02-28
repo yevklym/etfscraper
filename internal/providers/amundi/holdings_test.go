@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/yevklym/etfscraper"
 	"github.com/yevklym/etfscraper/internal/testutil"
 )
 
@@ -122,7 +123,12 @@ func TestConvertHoldings_DerivesMarketValue(t *testing.T) {
 		{Name: "Provided", Weight: 0.2, MarketValue: 42},
 	}
 
-	holdings := convertHoldings(items, 1000)
+	c, err := New("de")
+	if err != nil {
+		t.Fatalf("New() failed: %v", err)
+	}
+
+	holdings := c.convertHoldings(items, 1000)
 	if len(holdings) != 3 {
 		t.Fatalf("expected 3 holdings, got %d", len(holdings))
 	}
@@ -214,6 +220,12 @@ func TestHoldings_EndToEnd(t *testing.T) {
 	}
 	if snapshot.Holdings[0].MarketValue != 100 {
 		t.Fatalf("expected market value 100, got %f", snapshot.Holdings[0].MarketValue)
+	}
+	if snapshot.Holdings[0].Sector != etfscraper.SectorInformationTechnology {
+		t.Errorf("expected sector %q, got %q", etfscraper.SectorInformationTechnology, snapshot.Holdings[0].Sector)
+	}
+	if snapshot.Holdings[0].AssetClass != etfscraper.AssetClassEquity {
+		t.Errorf("expected asset class %q, got %q", etfscraper.AssetClassEquity, snapshot.Holdings[0].AssetClass)
 	}
 }
 

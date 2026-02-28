@@ -112,7 +112,7 @@ func (c *Client) Holdings(ctx context.Context, identifier string) (*etfscraper.H
 		return nil, err
 	}
 
-	holdings := convertHoldings(composition, fund.TotalAssets)
+	holdings := c.convertHoldings(composition, fund.TotalAssets)
 	if len(holdings) == 0 {
 		return nil, fmt.Errorf("no holdings found for fund %s", fund.Ticker)
 	}
@@ -196,7 +196,7 @@ func parseComposition(raw json.RawMessage) ([]compositionItem, error) {
 	return nil, fmt.Errorf("composition data missing")
 }
 
-func convertHoldings(items []compositionItem, fundTotalAssets float64) []etfscraper.Holding {
+func (c *Client) convertHoldings(items []compositionItem, fundTotalAssets float64) []etfscraper.Holding {
 	holdings := make([]etfscraper.Holding, 0, len(items))
 	for _, item := range items {
 		name := strings.TrimSpace(item.Name)
@@ -221,8 +221,8 @@ func convertHoldings(items []compositionItem, fundTotalAssets float64) []etfscra
 			Quantity:    item.Quantity,
 			MarketValue: marketValue,
 			Currency:    mapCurrency(item.Currency),
-			Sector:      etfscraper.Sector(item.Sector),
-			AssetClass:  mapHoldingAssetClass(item.Type),
+			Sector:      normalizeSector(item.Sector, c.config.SectorMapping),
+			AssetClass:  normalizeAssetClass(item.Type, c.config.AssetClassMapping),
 			Location:    etfscraper.Location(item.CountryOfRisk),
 		}
 
@@ -237,24 +237,6 @@ func normalizeWeight(weight float64) float64 {
 		return weight / 100.0
 	}
 	return weight
-}
-
-func mapHoldingAssetClass(value string) etfscraper.AssetClass {
-	trimmed := strings.TrimSpace(value)
-	if trimmed == "" {
-		return ""
-	}
-
-	switch strings.ToLower(trimmed) {
-	case "equity":
-		return etfscraper.AssetClassEquity
-	case "bond", "fixed income":
-		return etfscraper.AssetClassBond
-	case "cash":
-		return etfscraper.AssetClassCash
-	default:
-		return etfscraper.AssetClass(trimmed)
-	}
 }
 
 type dateValue struct {
