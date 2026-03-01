@@ -1,34 +1,21 @@
 # ETF Scraper
 
-`etfscraper` is a Go library designed to discover and extract detailed data from Exchange-Traded Fund (ETF) providers.
+`etfscraper` is a Go library for discovering ETFs and fetching fund metadata and holdings from providers. Zero external dependencies — stdlib only.
 
-Currently, it supports the **iShares** (US, DE, UK, FR) provider with fund metadata and holdings,
-and **Amundi** (DE, UK, FR) with fund metadata and holdings. Other regions and providers are planned for future releases.
+## Supported Providers
 
-## Features
-
-* **Fund Discovery**: Automatically discover all available ETFs from a provider.
-* **Detailed Metadata**: Extract key fund information including:
-    * Ticker, Name, and ISIN
-    * Total Assets (AUM)
-    * Expense Ratio
-    * Inception Date
-* **Deep Holdings Analysis**: Download and parse full holdings for specific funds.
-    * Extracts Ticker, Name, Sector, Asset Class, Weight, and Market Value.
-* **Multi-Region Support**: Currently supports iShares US/DE/UK regions, with extensible configuration for additional
-  regions.
-* **Configurable HTTP Client**: Customize timeouts and HTTP client behavior.
+| Provider | Regions |
+|----------|---------|
+| iShares  | us, de, uk, fr |
+| Amundi   | de, uk, fr |
 
 ## Installation
-To use `etfscraper` in your own Go project:
 
 ```bash
 go get github.com/yevklym/etfscraper
 ```
 
-## Usage
-
-### Quick Start
+## Quick Start
 
 ```go
 package main
@@ -42,136 +29,108 @@ import (
 )
 
 func main() {
-	// String spec: "provider:region"
-	client, err := providers.Open("ishares:uk")
+	provider, err := providers.Open("ishares:us")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	funds, err := client.DiscoverETFs(context.Background())
+	ctx := context.Background()
+
+	// Discover all ETFs
+	funds, err := provider.DiscoverETFs(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	fmt.Printf("Found %d ETFs\n", len(funds))
-}
 
-```
-
-Typed option:
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-
-	"github.com/yevklym/etfscraper/providers"
-)
-
-func main() {
-	spec := providers.Spec{Name: "ishares", Region: "uk"}
-	client, err := providers.OpenSpec(spec)
+	// Get holdings for a specific fund
+	snapshot, err := provider.Holdings(ctx, "IVV")
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	funds, err := client.DiscoverETFs(context.Background())
-	if err != nil {
-		log.Fatal(err)
+	fmt.Printf("Holdings: %d (as of %s)\n", snapshot.TotalHoldings, snapshot.AsOfDate.Format("2006-01-02"))
+	for _, h := range snapshot.Holdings[:5] {
+		fmt.Printf("  %s: %.2f%%\n", h.Name, h.Weight*100)
 	}
-
-	fmt.Printf("Found %d ETFs\n", len(funds))
 }
 ```
 
+### Bulk Holdings (avoiding N+1)
 
-### Library Example
+When fetching holdings for multiple funds, use `HoldingsForFund` to skip the internal discovery lookup on each call:
 
 ```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-	"net/http"
-	"time"
-
-	"github.com/yevklym/etfscraper/providers"
-)
-
-func main() {
-	// 1. Initialize the provider (pass nil to use default HTTP client)
-	client := &http.Client{Timeout: 30 * time.Second}
-	provider, err := providers.Open("ishares:us", providers.WithHTTPClient(client))
+funds, _ := provider.DiscoverETFs(ctx)
+for i := range funds[:5] {
+	snapshot, err := provider.HoldingsForFund(ctx, &funds[i])
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("skipping %s: %v", funds[i].Ticker, err)
+		continue
 	}
+	fmt.Printf("%s: %d holdings\n", funds[i].Ticker, snapshot.TotalHoldings)
+}
+```
 
-	// 2. Get specific Fund Information
-	fund, err := provider.FundInfo(context.Background(), "IVV")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Found Fund: %s (%s)\n", fund.Name, fund.Ticker)
+## Configuration
 
-	// 3. Get Full Holdings
-	holdings, err := provider.Holdings(context.Background(), "IVV")
-	if err != nil {
-		log.Fatal(err)
-	}
+```go
+// Custom timeout
+provider, _ := providers.Open("amundi:de", providers.WithTimeout(30*time.Second))
 
-	fmt.Printf("Total Holdings: %d\n", holdings.TotalHoldings)
-	for _, h := range holdings.Holdings[:5] {
-		fmt.Printf("- %s: %.2f%%\n", h.Name, h.Weight*100)
-	}
+// Custom HTTP client
+provider, _ := providers.Open("ishares:uk", providers.WithHTTPClient(myClient))
+
+// Debug logging
+provider, _ := providers.Open("ishares:us", providers.WithDebug(true))
+
+// Custom logger (or silence with etfscraper.NopLogger())
+provider, _ := providers.Open("ishares:us", providers.WithLogger(etfscraper.NopLogger()))
+
+// Discovery cache TTL (default 5m, set 0 to disable)
+provider, _ := providers.Open("ishares:us", providers.WithCacheTTL(10*time.Minute))
+
+// Typed spec
+provider, _ := providers.OpenSpec(providers.Spec{Name: "ishares", Region: "uk"})
+```
+
+List supported providers at runtime:
+
+```go
+for _, p := range providers.SupportedProviders() {
+	fmt.Printf("%s: %v\n", p.Name, p.Regions)
+}
+```
+
+## Provider Interface
+
+All providers implement the `etfscraper.Provider` interface:
+
+```go
+type Provider interface {
+	DiscoverETFs(ctx context.Context) ([]Fund, error)
+	FundInfo(ctx context.Context, identifier string) (*Fund, error)
+	Holdings(ctx context.Context, identifier string) (*HoldingsSnapshot, error)
+	HoldingsForFund(ctx context.Context, fund *Fund) (*HoldingsSnapshot, error)
 }
 ```
 
 ## Architecture
 
-The project follows the following layout:
-
-* **`etfprovider.go`**: Defines the core `Provider` interface.
-* **`fund.go`, `holding.go`, `enums.go`**: Domain models representing Funds, Holdings, and financial constants (
-  Currency, AssetClass, Sector, Exchange).
-* **`providers/`**: Public factory for opening providers via a spec like `ishares:uk`.
-* **`internal/providers/`**: Contains concrete implementations of the `Provider` interface.
-    * **`ishares/`**: iShares provider implementation.
-        * `client.go`: Main entry point for the iShares provider.
-        * `discovery.go`: Handles fetching the list of all ETFs.
-        * `holdings.go`: Handles downloading and parsing CSV holdings files.
-        * `column_resolver.go`: Flexible CSV column mapping for different regional formats.
-        * `config.go`: Region-specific configurations (date formats, headers).
-        * `options.go`: Client configuration options (HTTP client, timeouts).
-    * **`amundi/`**: Amundi provider implementation with similar structure.
-
-## Provider Spec
-
-Use `provider:region` to open a provider instance:
-
-- `ishares:us`
-- `ishares:de`
-- `ishares:uk`
-- `amundi:de`
-
-To list all available providers and regions at runtime:
-
-```go
-for _, spec := range providers.SupportedProviders() {
-fmt.Printf("%s: %v\n", spec.Name, spec.Regions)
-}
+```
+etfprovider.go                        Provider interface
+fund.go, holding.go                   Fund, Holding, HoldingsSnapshot structs
+enums.go                              Currency, Exchange, Sector, AssetClass types
+errors.go                             Sentinel errors (ErrHoldingsUnavailable)
+config.go                             HTTPClient, HTTPConfig, Logger interfaces
+providers/                            Public factory: Open(), OpenSpec(), options
+internal/providers/ishares/           iShares provider (CSV holdings, JSON discovery)
+internal/providers/amundi/            Amundi provider (JSON API)
+internal/testutil/                    Shared HTTP mock for tests
+cmd/cli/                              CLI demo
 ```
 
 ## Testing
 
-The project is test-driven.
-
-To run all tests:
-
 ```bash
-go test -v ./...
+go test -v -race ./...
 ```
