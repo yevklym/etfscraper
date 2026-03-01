@@ -16,7 +16,7 @@ func main() {
 
 	// --- Example Usage of FundInfo() and Holdings() for a specific ETF ---
 	fmt.Println("--- Demonstrating specific fund lookup and holdings ---")
-	exampleTicker := "GSPX" // iShares S&P 500 Information Technology Sector UCITS ETF
+	exampleTicker := "GSPX" // Amundi S&P 500 II UCITS ETF
 
 	fmt.Printf("Fetching FundInfo for %s...\n", exampleTicker)
 	specificFund, err := provider.FundInfo(context.Background(), exampleTicker)
@@ -60,7 +60,7 @@ func main() {
 	fmt.Printf("Successfully discovered %d ETFs!\n\n", len(funds))
 
 	// Show first 5 ETFs
-	for i, fund := range funds[:min(50, len(funds))] {
+	for i, fund := range funds[:min(5, len(funds))] {
 		fmt.Printf("%d. %s (%s)\n", i+1, fund.Name, fund.Ticker)
 		fmt.Printf("   ISIN: %s\n", fund.ISIN)
 		fmt.Printf("   Currency: %s\n", fund.Currency)
