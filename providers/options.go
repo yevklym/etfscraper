@@ -21,6 +21,9 @@ func WithHTTPConfig(cfg etfscraper.HTTPConfig) Option {
 		if cfg.Client == nil {
 			cfg.Client = o.httpConfig.Client
 		}
+		if cfg.Logger == nil {
+			cfg.Logger = o.httpConfig.Logger
+		}
 		o.httpConfig = cfg
 	}
 }
@@ -52,6 +55,16 @@ func WithHTTPClient(client etfscraper.HTTPClient) Option {
 func WithDebug(enabled bool) Option {
 	return func(o *providerOptions) {
 		o.httpConfig.Debug = enabled
+	}
+}
+
+// WithLogger sets a custom logger for provider diagnostic output.
+// Pass etfscraper.NopLogger() to silence all logging.
+func WithLogger(logger etfscraper.Logger) Option {
+	return func(o *providerOptions) {
+		if logger != nil {
+			o.httpConfig.Logger = logger
+		}
 	}
 }
 

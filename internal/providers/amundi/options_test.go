@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/yevklym/etfscraper"
 	"github.com/yevklym/etfscraper/internal/testutil"
 )
 
@@ -65,6 +66,31 @@ func TestClientOptions(t *testing.T) {
 		}
 		if !c.httpConfig.Debug {
 			t.Error("expected debug to be true")
+		}
+	})
+
+	t.Run("WithLogger option", func(t *testing.T) {
+		nop := etfscraper.NopLogger()
+		c, err := New("de", WithLogger(nop))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if c.httpConfig.Logger != nop {
+			t.Error("expected NopLogger to be set")
+		}
+	})
+
+	t.Run("WithLogger nil ignored", func(t *testing.T) {
+		c, err := New("de")
+		if err != nil {
+			t.Fatal(err)
+		}
+		original := c.httpConfig.Logger
+
+		WithLogger(nil)(c)
+		if c.httpConfig.Logger != original {
+			t.Error("expected nil logger to be ignored")
 		}
 	})
 }

@@ -107,3 +107,35 @@ func TestWithCacheTTL(t *testing.T) {
 		t.Errorf("cacheTTL = %v, want 0 (disable)", opts.cacheTTL)
 	}
 }
+
+func TestWithLogger(t *testing.T) {
+	opts := providerOptions{httpConfig: etfscraper.DefaultHTTPConfig()}
+
+	nop := etfscraper.NopLogger()
+	WithLogger(nop)(&opts)
+	if opts.httpConfig.Logger != nop {
+		t.Fatal("expected NopLogger to be set")
+	}
+
+	// nil should be ignored
+	WithLogger(nil)(&opts)
+	if opts.httpConfig.Logger != nop {
+		t.Fatal("expected nil to be ignored, logger should remain unchanged")
+	}
+}
+
+func TestWithHTTPConfig_PreservesLogger(t *testing.T) {
+	nop := etfscraper.NopLogger()
+	opts := providerOptions{httpConfig: etfscraper.DefaultHTTPConfig()}
+	opts.httpConfig.Logger = nop
+
+	// HTTPConfig with nil Logger should preserve existing logger
+	cfg := etfscraper.HTTPConfig{
+		Timeout: 60 * time.Second,
+	}
+	WithHTTPConfig(cfg)(&opts)
+
+	if opts.httpConfig.Logger != nop {
+		t.Error("expected nil Logger in HTTPConfig to preserve existing logger")
+	}
+}
