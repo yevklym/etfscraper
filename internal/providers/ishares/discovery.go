@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -58,7 +57,7 @@ type iSharesFundMetadata struct {
 
 func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, error) {
 	if c.httpConfig.Debug {
-		log.Printf("ishares: discovery request %s", c.config.DiscoveryURL)
+		c.httpConfig.Logger.Printf("ishares: discovery request %s", c.config.DiscoveryURL)
 	}
 	req, err := http.NewRequestWithContext(ctx, "GET", c.config.DiscoveryURL, nil)
 	if err != nil {
@@ -72,13 +71,13 @@ func (c *Client) fetchAndDecodeFunds(ctx context.Context) ([]etfscraper.Fund, er
 
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Printf("Warning: failed to close response body: %v", closeErr)
+			c.httpConfig.Logger.Printf("Warning: failed to close response body: %v", closeErr)
 		}
 	}()
 
 	if resp.StatusCode != http.StatusOK {
 		if c.httpConfig.Debug {
-			log.Printf("ishares: discovery response %s", resp.Status)
+			c.httpConfig.Logger.Printf("ishares: discovery response %s", resp.Status)
 		}
 		return nil, fmt.Errorf("ishares: discovery: HTTP %d: %s", resp.StatusCode, resp.Status)
 	}

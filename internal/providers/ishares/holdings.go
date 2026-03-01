@@ -5,7 +5,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"slices"
 	"strings"
@@ -44,7 +43,7 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Printf("Warning: failed to close response body: %v", closeErr)
+			c.httpConfig.Logger.Printf("Warning: failed to close response body: %v", closeErr)
 		}
 	}()
 
@@ -106,7 +105,7 @@ func (c *Client) parseHoldings(ctx context.Context, reader io.Reader, fund *etfs
 			break
 		}
 		if err != nil {
-			log.Printf("Warning: CSV parsing error: %v", err)
+			c.httpConfig.Logger.Printf("Warning: CSV parsing error: %v", err)
 			continue
 		}
 
@@ -121,7 +120,7 @@ func (c *Client) parseHoldings(ctx context.Context, reader io.Reader, fund *etfs
 
 		holding, err := c.parseHoldingRecord(record, resolver)
 		if err != nil {
-			log.Printf("Warning: skipping holding record: %v", err)
+			c.httpConfig.Logger.Printf("Warning: skipping holding record: %v", err)
 			continue
 		}
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/yevklym/etfscraper"
@@ -60,7 +59,7 @@ func (c *Client) discoverFresh(ctx context.Context) ([]etfscraper.Fund, error) {
 	url := c.config.BaseURL + c.config.DiscoveryPath
 
 	if c.httpConfig.Debug {
-		log.Printf("amundi: discovery request %s (region: %s)", url, c.region)
+		c.httpConfig.Logger.Printf("amundi: discovery request %s (region: %s)", url, c.region)
 	}
 
 	resp, err := c.doPost(ctx, url, body)
@@ -69,13 +68,13 @@ func (c *Client) discoverFresh(ctx context.Context) ([]etfscraper.Fund, error) {
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Printf("Warning: failed to close response body: %v", closeErr)
+			c.httpConfig.Logger.Printf("Warning: failed to close response body: %v", closeErr)
 		}
 	}()
 
 	if resp.StatusCode != http.StatusOK {
 		if c.httpConfig.Debug {
-			log.Printf("amundi: discovery response %s", resp.Status)
+			c.httpConfig.Logger.Printf("amundi: discovery response %s", resp.Status)
 		}
 		return nil, fmt.Errorf("amundi: discovery: HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
@@ -86,7 +85,7 @@ func (c *Client) discoverFresh(ctx context.Context) ([]etfscraper.Fund, error) {
 	}
 
 	if c.httpConfig.Debug {
-		log.Printf("amundi: discovered %d ETFs", len(payload.Products))
+		c.httpConfig.Logger.Printf("amundi: discovered %d ETFs", len(payload.Products))
 	}
 
 	return c.convertToFunds(payload.Products), nil

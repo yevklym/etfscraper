@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -79,7 +78,7 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 	url := c.config.BaseURL + c.config.HoldingsPath
 
 	if c.httpConfig.Debug {
-		log.Printf("amundi: holdings request %s (isin: %s)", url, fund.ISIN)
+		c.httpConfig.Logger.Printf("amundi: holdings request %s (isin: %s)", url, fund.ISIN)
 	}
 
 	resp, err := c.doPost(ctx, url, body)
@@ -88,13 +87,13 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Printf("Warning: failed to close response body: %v", closeErr)
+			c.httpConfig.Logger.Printf("Warning: failed to close response body: %v", closeErr)
 		}
 	}()
 
 	if resp.StatusCode != http.StatusOK {
 		if c.httpConfig.Debug {
-			log.Printf("amundi: holdings response %s", resp.Status)
+			c.httpConfig.Logger.Printf("amundi: holdings response %s", resp.Status)
 		}
 		return nil, fmt.Errorf("amundi: holdings: HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
