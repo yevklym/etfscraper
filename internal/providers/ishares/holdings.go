@@ -77,13 +77,11 @@ func (c *Client) parseHoldings(ctx context.Context, reader io.Reader, fund *etfs
 	csvReader.LazyQuotes = true
 	csvReader.FieldsPerRecord = -1
 
-	// Find and parse the "as of" date
 	asOfDate, err := c.findAndParseDate(csvReader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find date header: %w", err)
 	}
 
-	// Find and parse the data header row
 	headerRow, err := c.findHeaderRow(csvReader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find data header: %w", err)
@@ -91,7 +89,27 @@ func (c *Client) parseHoldings(ctx context.Context, reader io.Reader, fund *etfs
 
 	resolver := newColumnResolver(headerRow)
 
-	// Parse holdings data using column map
+	holdings, err := c.readHoldingRecords(ctx, csvReader, resolver)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(holdings) == 0 {
+		return nil, fmt.Errorf("%w: fund %s", etfscraper.ErrHoldingsUnavailable, fund.Ticker)
+	}
+
+	return &etfscraper.HoldingsSnapshot{
+		Fund:          *fund,
+		AsOfDate:      asOfDate,
+		Holdings:      holdings,
+		LastUpdated:   time.Now(),
+		TotalHoldings: len(holdings),
+	}, nil
+}
+
+// readHoldingRecords iterates over CSV data rows, parsing each into a Holding
+// until EOF, an empty row, or a disclaimer row is encountered.
+func (c *Client) readHoldingRecords(ctx context.Context, csvReader *csv.Reader, resolver *columnResolver) ([]etfscraper.Holding, error) {
 	holdings := make([]etfscraper.Holding, 0, 128)
 	for {
 		select {
@@ -109,7 +127,6 @@ func (c *Client) parseHoldings(ctx context.Context, reader io.Reader, fund *etfs
 			continue
 		}
 
-		// Stop at empty rows
 		if len(record) == 0 || record[0] == "" {
 			break
 		}
@@ -126,18 +143,7 @@ func (c *Client) parseHoldings(ctx context.Context, reader io.Reader, fund *etfs
 
 		holdings = append(holdings, holding)
 	}
-
-	if len(holdings) == 0 {
-		return nil, fmt.Errorf("%w: fund %s", etfscraper.ErrHoldingsUnavailable, fund.Ticker)
-	}
-
-	return &etfscraper.HoldingsSnapshot{
-		Fund:          *fund,
-		AsOfDate:      asOfDate,
-		Holdings:      holdings,
-		LastUpdated:   time.Now(),
-		TotalHoldings: len(holdings),
-	}, nil
+	return holdings, nil
 }
 
 // isDisclaimerRow detects footer/disclaimer rows that should terminate CSV parsing.

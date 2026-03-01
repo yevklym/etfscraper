@@ -65,42 +65,9 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 		return nil, fmt.Errorf("fund cannot be nil")
 	}
 
-	requestBody, err := buildHoldingsRequest(c.region, fund.ISIN)
+	payload, err := c.fetchHoldingsPayload(ctx, fund.ISIN)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build holdings request: %w", err)
-	}
-
-	body, err := json.Marshal(requestBody)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request body: %w", err)
-	}
-
-	url := c.config.BaseURL + c.config.HoldingsPath
-
-	if c.httpConfig.Debug {
-		c.httpConfig.Logger.Printf("amundi: holdings request %s (isin: %s)", url, fund.ISIN)
-	}
-
-	resp, err := c.doPost(ctx, url, body)
-	if err != nil {
-		return nil, fmt.Errorf("amundi: holdings: %w", err)
-	}
-	defer func() {
-		if closeErr := resp.Body.Close(); closeErr != nil {
-			c.httpConfig.Logger.Printf("Warning: failed to close response body: %v", closeErr)
-		}
-	}()
-
-	if resp.StatusCode != http.StatusOK {
-		if c.httpConfig.Debug {
-			c.httpConfig.Logger.Printf("amundi: holdings response %s", resp.Status)
-		}
-		return nil, fmt.Errorf("amundi: holdings: HTTP %d: %s", resp.StatusCode, resp.Status)
-	}
-
-	var payload holdingsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+		return nil, err
 	}
 
 	product, err := selectHoldingsProduct(payload.Products, fund.ISIN)
@@ -130,6 +97,49 @@ func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*e
 		LastUpdated:   time.Now(),
 		TotalHoldings: len(holdings),
 	}, nil
+}
+
+// fetchHoldingsPayload builds the request, performs the HTTP call, and decodes the response.
+func (c *Client) fetchHoldingsPayload(ctx context.Context, isin string) (*holdingsResponse, error) {
+	requestBody, err := buildHoldingsRequest(c.region, isin)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build holdings request: %w", err)
+	}
+
+	body, err := json.Marshal(requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request body: %w", err)
+	}
+
+	url := c.config.BaseURL + c.config.HoldingsPath
+
+	if c.httpConfig.Debug {
+		c.httpConfig.Logger.Printf("amundi: holdings request %s (isin: %s)", url, isin)
+	}
+
+	resp, err := c.doPost(ctx, url, body)
+	if err != nil {
+		return nil, fmt.Errorf("amundi: holdings: %w", err)
+	}
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			c.httpConfig.Logger.Printf("Warning: failed to close response body: %v", closeErr)
+		}
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		if c.httpConfig.Debug {
+			c.httpConfig.Logger.Printf("amundi: holdings response %s", resp.Status)
+		}
+		return nil, fmt.Errorf("amundi: holdings: HTTP %d: %s", resp.StatusCode, resp.Status)
+	}
+
+	var payload holdingsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &payload, nil
 }
 
 func selectHoldingsProduct(products []holdingsProduct, isin string) (*holdingsProduct, error) {
