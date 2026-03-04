@@ -16,6 +16,8 @@ type providerOptions struct {
 }
 
 // WithHTTPConfig applies a complete HTTP configuration to provider clients.
+// Nil fields in cfg are preserved from the existing defaults: a nil Client
+// keeps the default HTTP client, and a nil Logger keeps the default logger.
 func WithHTTPConfig(cfg etfscraper.HTTPConfig) Option {
 	return func(o *providerOptions) {
 		if cfg.Client == nil {
@@ -29,6 +31,7 @@ func WithHTTPConfig(cfg etfscraper.HTTPConfig) Option {
 }
 
 // WithTimeout sets the HTTP request timeout for provider clients.
+// Non-positive values are ignored and the existing timeout is kept.
 func WithTimeout(timeout time.Duration) Option {
 	return func(o *providerOptions) {
 		if timeout <= 0 {
@@ -43,6 +46,7 @@ func WithTimeout(timeout time.Duration) Option {
 }
 
 // WithHTTPClient sets a custom HTTP client for provider requests.
+// A nil client is ignored and the default is kept.
 func WithHTTPClient(client etfscraper.HTTPClient) Option {
 	return func(o *providerOptions) {
 		if client != nil {
@@ -51,7 +55,7 @@ func WithHTTPClient(client etfscraper.HTTPClient) Option {
 	}
 }
 
-// WithDebug enables provider debug logging.
+// WithDebug enables provider debug logging (request URLs and response metadata).
 func WithDebug(enabled bool) Option {
 	return func(o *providerOptions) {
 		o.httpConfig.Debug = enabled
@@ -59,7 +63,7 @@ func WithDebug(enabled bool) Option {
 }
 
 // WithLogger sets a custom logger for provider diagnostic output.
-// Pass etfscraper.NopLogger() to silence all logging.
+// A nil logger is ignored. Pass etfscraper.NopLogger() to silence all logging.
 func WithLogger(logger etfscraper.Logger) Option {
 	return func(o *providerOptions) {
 		if logger != nil {

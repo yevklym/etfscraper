@@ -25,7 +25,8 @@ type Spec struct {
 	Region string
 }
 
-// Open creates a provider from a "provider:region" spec string.
+// Open creates a provider from a "provider:region" spec string (e.g.
+// "ishares:us", "amundi:de"). The provider name is case-insensitive.
 func Open(spec string, opts ...Option) (etfscraper.Provider, error) {
 	name, region, err := ParseProviderSpec(spec)
 	if err != nil {
@@ -41,6 +42,7 @@ func OpenSpec(spec Spec, opts ...Option) (etfscraper.Provider, error) {
 }
 
 // OpenNameRegion creates a provider from explicit name and region values.
+// The name is case-insensitive (e.g. "iShares" and "ishares" are equivalent).
 func OpenNameRegion(name, region string, opts ...Option) (etfscraper.Provider, error) {
 	options := providerOptions{
 		httpConfig: etfscraper.DefaultHTTPConfig(),
@@ -68,6 +70,7 @@ func OpenNameRegion(name, region string, opts ...Option) (etfscraper.Provider, e
 }
 
 // ParseProviderSpec parses a "provider:region" string into name and region.
+// If no colon is present, region is returned as an empty string.
 func ParseProviderSpec(spec string) (name string, region string, err error) {
 	trimmed := strings.TrimSpace(spec)
 	if trimmed == "" {
