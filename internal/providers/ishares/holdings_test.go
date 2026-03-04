@@ -269,6 +269,39 @@ func TestParseHoldings_GermanDottedDate(t *testing.T) {
 	}
 }
 
+func TestParseHoldings_WhitespaceOnlyRow(t *testing.T) {
+	// iShares DE CSVs sometimes include a whitespace-only row before the
+	// disclaimer. This row has a single column containing " " which must
+	// be treated as an empty row and terminate parsing cleanly.
+	csvData := "iShares $ Treasury Bond UCITS ETF\n" +
+		"Fondsposition per,\"03.M\u00e4rz2026\"\n" +
+		"\n" +
+		"Emittententicker,Name,Sektor,Anlageklasse,Marktwert,Gewichtung (%),Nominale,Kurs,Standort,B\u00f6rse,Marktw\u00e4hrung\n" +
+		"\"ARGENT\",\"ARGENTINA REPUBLIC OF GOVERNMENT\",\"Sovereigns\",\"Anleihen\",\"90.177.701,15\",\"1,08\",\"119.569.309,00\",\"74,80\",\"Argentinien\",\"-\",\"USD\"\n" +
+		" \n" +
+		"\"The content contained herein...\""
+
+	c, err := New("de")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	fund := &etfscraper.Fund{Ticker: "SNA2", Name: "iShares $ Treasury Bond UCITS ETF"}
+
+	snapshot, err := c.parseHoldings(context.Background(), strings.NewReader(csvData), fund)
+	if err != nil {
+		t.Fatalf("parseHoldings failed: %v", err)
+	}
+
+	if snapshot.TotalHoldings != 1 {
+		t.Errorf("Expected 1 holding, got %d", snapshot.TotalHoldings)
+	}
+
+	if snapshot.Holdings[0].Ticker != "ARGENT" {
+		t.Errorf("Expected ticker ARGENT, got %s", snapshot.Holdings[0].Ticker)
+	}
+}
+
 func TestTranslateMonth(t *testing.T) {
 	translations := regionConfigs["de"].MonthTranslations
 

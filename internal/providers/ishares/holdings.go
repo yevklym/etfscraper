@@ -128,7 +128,7 @@ func (c *Client) readHoldingRecords(ctx context.Context, csvReader *csv.Reader, 
 			continue
 		}
 
-		if len(record) == 0 || record[0] == "" {
+		if len(record) == 0 || strings.TrimSpace(record[0]) == "" {
 			break
 		}
 
