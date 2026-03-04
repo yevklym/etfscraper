@@ -9,6 +9,8 @@ import (
 // HTTPClient is the interface used to execute HTTP requests.
 // It is satisfied by *http.Client and can be replaced for testing.
 type HTTPClient interface {
+	// Do sends an HTTP request and returns an HTTP response.
+	// Implementations should follow the same contract as http.Client.Do.
 	Do(req *http.Request) (*http.Response, error)
 }
 
@@ -40,10 +42,17 @@ func (l *nopLogger) Printf(string, ...any) {}
 
 // HTTPConfig holds the HTTP transport settings shared by all providers.
 type HTTPConfig struct {
-	Client  HTTPClient
+	// Client is the HTTP client used for requests. Defaults to an *http.Client
+	// with a 15-second timeout.
+	Client HTTPClient
+	// Timeout is the HTTP request timeout. This is kept in sync with Client.Timeout
+	// when using the default *http.Client or WithTimeout.
 	Timeout time.Duration
-	Debug   bool
-	Logger  Logger
+	// Debug enables verbose diagnostic logging (request URLs and response metadata).
+	Debug bool
+	// Logger receives diagnostic and warning messages. Defaults to DefaultLogger.
+	// Set to NopLogger() to silence all output.
+	Logger Logger
 }
 
 // DefaultHTTPConfig returns an HTTPConfig with sensible defaults:

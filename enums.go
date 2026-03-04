@@ -1,24 +1,26 @@
 package etfscraper
 
-// Currency represents a currency code
+// Currency represents an ISO 4217 currency code.
 type Currency string
 
-// Exchange represents a stock exchange
+// Exchange represents a stock exchange.
 type Exchange string
 
-// AssetClass represents the type of financial asset
+// AssetClass represents the type of financial asset.
 type AssetClass string
 
-// Sector represents the economic sector (GICS)
+// Sector represents the economic sector using GICS classification.
 type Sector string
 
-// Location represents a country or region
+// Location represents a country or region.
+// Values are provider-specific free-form strings, not a closed set of constants.
 type Location string
 
 // ProviderName identifies an ETF data provider.
 type ProviderName string
 
-// Currency constants
+// Common currency constants (ISO 4217). Providers may return values not in
+// this list; use these constants for comparison rather than raw strings.
 const (
 	CurrencyUSD Currency = "USD" // US Dollar
 	CurrencyEUR Currency = "EUR" // Euro
@@ -32,7 +34,8 @@ const (
 	CurrencyBRL Currency = "BRL" // Brazilian Real
 )
 
-// AssetClass constants
+// Common asset class constants. Providers normalize localized values to
+// these English strings. Providers may return values not in this list.
 const (
 	AssetClassEquity         AssetClass = "Equity"
 	AssetClassBond           AssetClass = "Bond"
@@ -43,7 +46,7 @@ const (
 	AssetClassCryptocurrency AssetClass = "Cryptocurrency"
 )
 
-// Exchange constants - major stock exchanges worldwide
+// Common exchange constants. Providers may return values not in this list.
 const (
 	ExchangeNYSE     Exchange = "NYSE"     // New York Stock Exchange
 	ExchangeNASDAQ   Exchange = "NASDAQ"   // NASDAQ
@@ -60,7 +63,8 @@ const (
 	ExchangeASX      Exchange = "ASX"      // Australian Securities Exchange
 )
 
-// Sector constants - GICS sector classification
+// Common GICS sector constants. Providers normalize localized sector names
+// to these English strings. Providers may return values not in this list.
 const (
 	SectorEnergy                Sector = "Energy"
 	SectorMaterials             Sector = "Materials"

@@ -4,10 +4,10 @@
 
 ## Supported Providers
 
-| Provider | Regions |
-|----------|---------|
+| Provider | Regions        |
+|----------|----------------|
 | iShares  | us, de, uk, fr |
-| Amundi   | de, uk, fr |
+| Amundi   | de, uk, fr     |
 
 ## Installation
 
@@ -114,6 +114,10 @@ type Provider interface {
 }
 ```
 
+- `identifier` accepts a fund ticker or ISIN.
+- `Holdings` internally calls `FundInfo` to resolve the identifier; use `HoldingsForFund` when you already have the `Fund` to avoid repeated lookups.
+- `ErrHoldingsUnavailable` is returned when a provider cannot supply holdings for a given fund. Use `errors.Is(err, etfscraper.ErrHoldingsUnavailable)` to check.
+
 ## Architecture
 
 ```
@@ -126,7 +130,7 @@ providers/                            Public factory: Open(), OpenSpec(), option
 internal/providers/ishares/           iShares provider (CSV holdings, JSON discovery)
 internal/providers/amundi/            Amundi provider (JSON API)
 internal/testutil/                    Shared HTTP mock for tests
-cmd/cli/                              CLI demo
+cmd/example/                          Runnable usage example
 ```
 
 ## Testing
