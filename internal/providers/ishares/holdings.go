@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"slices"
+	"sort"
 	"strings"
 	"time"
 
@@ -302,9 +303,7 @@ func (c *Client) findAndParseDate(csvReader *csv.Reader) (time.Time, error) {
 				dateStr := strings.TrimSpace(record[1])
 
 				if c.config.MonthTranslations != nil {
-					for from, to := range c.config.MonthTranslations {
-						dateStr = strings.ReplaceAll(dateStr, from, to)
-					}
+					dateStr = translateMonth(dateStr, c.config.MonthTranslations)
 				}
 
 				var asOfDate time.Time
@@ -322,6 +321,22 @@ func (c *Client) findAndParseDate(csvReader *csv.Reader) (time.Time, error) {
 			}
 		}
 	}
+}
+
+// translateMonth applies month name translations longest-first to avoid
+// partial matches (e.g. "März" must be replaced before "Mär").
+func translateMonth(dateStr string, translations map[string]string) string {
+	keys := make([]string, 0, len(translations))
+	for k := range translations {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return len(keys[i]) > len(keys[j])
+	})
+	for _, from := range keys {
+		dateStr = strings.ReplaceAll(dateStr, from, translations[from])
+	}
+	return dateStr
 }
 
 func (c *Client) findHeaderRow(csvReader *csv.Reader) ([]string, error) {

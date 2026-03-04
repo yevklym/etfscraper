@@ -194,3 +194,106 @@ func TestParseHoldings_FrenchFormat(t *testing.T) {
 		t.Errorf("Expected third ticker MSFT, got %s", msft.Ticker)
 	}
 }
+
+func TestParseHoldings_GermanFormat(t *testing.T) {
+	csvData := "iShares $ Treasury Bond UCITS ETF\n" +
+		"Fondsposition per,\"03.M\u00e4rz2026\"\n" +
+		"\n" +
+		"Emittententicker,Name,Sektor,Anlageklasse,Marktwert,Gewichtung (%),Nominale,Kurs,Standort,B\u00f6rse,Marktw\u00e4hrung\n" +
+		"\"ARGENT\",\"ARGENTINA REPUBLIC OF GOVERNMENT\",\"Sovereigns\",\"Anleihen\",\"90.177.701,15\",\"1,08\",\"119.569.309,00\",\"74,80\",\"Argentinien\",\"-\",\"USD\"\n" +
+		"\"ECUA\",\"ECUADOR REPUBLIC OF (GOVERNMENT)\",\"Sovereigns\",\"Anleihen\",\"60.261.932,06\",\"0,72\",\"66.343.999,00\",\"90,20\",\"Ecuador\",\"-\",\"USD\"\n" +
+		"\n"
+
+	c, err := New("de")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	fund := &etfscraper.Fund{Ticker: "SNA2", Name: "iShares $ Treasury Bond UCITS ETF"}
+
+	snapshot, err := c.parseHoldings(context.Background(), strings.NewReader(csvData), fund)
+	if err != nil {
+		t.Fatalf("parseHoldings failed: %v", err)
+	}
+
+	expectedDate := time.Date(2026, time.March, 3, 0, 0, 0, 0, time.UTC)
+	if !snapshot.AsOfDate.Equal(expectedDate) {
+		t.Errorf("Expected AsOfDate %v, got %v", expectedDate, snapshot.AsOfDate)
+	}
+
+	if snapshot.TotalHoldings != 2 {
+		t.Errorf("Expected 2 holdings, got %d", snapshot.TotalHoldings)
+	}
+
+	argentina := snapshot.Holdings[0]
+	if argentina.Ticker != "ARGENT" {
+		t.Errorf("Expected first ticker ARGENT, got %s", argentina.Ticker)
+	}
+	if argentina.AssetClass != etfscraper.AssetClassBond {
+		t.Errorf("Expected asset class %s, got %s", etfscraper.AssetClassBond, argentina.AssetClass)
+	}
+	if argentina.Currency != etfscraper.CurrencyUSD {
+		t.Errorf("Expected currency USD, got %s", argentina.Currency)
+	}
+
+	epsilon := 0.01
+	if diff := argentina.MarketValue - 90177701.15; diff > epsilon || diff < -epsilon {
+		t.Errorf("Expected market value 90177701.15, got %f", argentina.MarketValue)
+	}
+}
+
+func TestParseHoldings_GermanDottedDate(t *testing.T) {
+	// Verify the old dotted format still works
+	csvData := "iShares Core DAX\n" +
+		"Fondsposition per,\"03.Okt.2025\"\n" +
+		"\n" +
+		"Emittententicker,Name,Sektor,Anlageklasse,Marktwert,Gewichtung (%),Nominale,Kurs,Standort,B\u00f6rse,Marktw\u00e4hrung\n" +
+		"\"SAP\",\"SAP SE\",\"IT\",\"Aktien\",\"180.198.609,94\",\"10,41\",\"672.929,00\",\"267,78\",\"Deutschland\",\"Xetra\",\"EUR\"\n" +
+		"\n"
+
+	c, err := New("de")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	fund := &etfscraper.Fund{Ticker: "EXS1", Name: "iShares Core DAX"}
+
+	snapshot, err := c.parseHoldings(context.Background(), strings.NewReader(csvData), fund)
+	if err != nil {
+		t.Fatalf("parseHoldings failed: %v", err)
+	}
+
+	expectedDate := time.Date(2025, time.October, 3, 0, 0, 0, 0, time.UTC)
+	if !snapshot.AsOfDate.Equal(expectedDate) {
+		t.Errorf("Expected AsOfDate %v, got %v", expectedDate, snapshot.AsOfDate)
+	}
+}
+
+func TestTranslateMonth(t *testing.T) {
+	translations := regionConfigs["de"].MonthTranslations
+
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"full month März", "03.März2026", "03.Mar2026"},
+		{"full month Juni", "18.Juni2050", "18.Jun2050"},
+		{"full month Juli", "09.Juli2035", "09.Jul2035"},
+		{"full month Oktober", "03.Oktober2025", "03.Oct2025"},
+		{"full month September", "14.September2024", "14.Sep2024"},
+		{"abbreviated Okt with dot", "03.Okt.2025", "03.Oct.2025"},
+		{"abbreviated Mär with dot", "15.Mär.2025", "15.Mar.2025"},
+		{"abbreviated Dez with dot", "25.Dez.2025", "25.Dec.2025"},
+		{"no month present", "03.04.2026", "03.04.2026"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := translateMonth(tt.input, translations)
+			if got != tt.want {
+				t.Errorf("translateMonth(%q) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
+	}
+}
