@@ -52,6 +52,25 @@ func TestSupportedProviders(t *testing.T) {
 	}
 }
 
+func TestSupportedProvidersCanBeOpened(t *testing.T) {
+	for _, spec := range SupportedProviders() {
+		if len(spec.Regions) == 0 {
+			t.Fatalf("expected regions for provider %q", spec.Name)
+		}
+		for _, region := range spec.Regions {
+			t.Run(spec.Name+":"+region, func(t *testing.T) {
+				provider, err := OpenNameRegion(spec.Name, region)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				if provider == nil {
+					t.Fatal("expected provider")
+				}
+			})
+		}
+	}
+}
+
 func TestOpenSpec(t *testing.T) {
 	provider, err := OpenSpec(Spec{Name: "ishares", Region: "us"})
 	if err != nil {
