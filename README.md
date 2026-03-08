@@ -2,6 +2,15 @@
 
 `etfscraper` is a Go library for discovering ETFs and fetching fund metadata and holdings from providers. Zero external dependencies — stdlib only.
 
+## Design
+
+The library has two public packages with different responsibilities:
+
+- `etfscraper` contains the core interfaces, domain types, errors, and shared configuration/logging primitives (for example `Provider`, `Fund`, `Holding`, `ErrHoldingsUnavailable`, `Logger`, `NopLogger()`).
+- `providers` contains the factory layer for creating concrete provider instances (for example `providers.Open(...)` and `providers.OpenSpec(...)`).
+
+In typical usage, import both packages: use `providers` to construct a provider, then work with shared types, interfaces, and helpers from `etfscraper`.
+
 ## Supported Providers
 
 | Provider | Regions        |
