@@ -172,7 +172,7 @@ func TestDiscoverCached_ZeroTTLAlwaysFetches(t *testing.T) {
 
 	ctx := context.Background()
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		_, err = c.DiscoverETFs(ctx)
 		if err != nil {
 			t.Fatalf("DiscoverETFs() call %d failed: %v", i+1, err)
