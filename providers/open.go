@@ -44,6 +44,11 @@ func OpenSpec(spec Spec, opts ...Option) (etfscraper.Provider, error) {
 // OpenNameRegion creates a provider from explicit name and region values.
 // The name is case-insensitive (e.g. "iShares" and "ishares" are equivalent).
 func OpenNameRegion(name, region string, opts ...Option) (etfscraper.Provider, error) {
+	name, region, err := validateProviderSelection(name, region)
+	if err != nil {
+		return nil, err
+	}
+
 	options := providerOptions{
 		httpConfig: etfscraper.DefaultHTTPConfig(),
 	}
@@ -67,6 +72,42 @@ func OpenNameRegion(name, region string, opts ...Option) (etfscraper.Provider, e
 	default:
 		return nil, fmt.Errorf("unknown provider: %s", name)
 	}
+}
+
+func validateProviderSelection(name, region string) (string, string, error) {
+	normalizedName := strings.ToLower(strings.TrimSpace(name))
+	if normalizedName == "" {
+		return "", "", fmt.Errorf("provider name is required")
+	}
+
+	normalizedRegion := strings.ToLower(strings.TrimSpace(region))
+	if normalizedRegion == "" {
+		return "", "", fmt.Errorf("provider region is required")
+	}
+
+	supported := make(map[string]map[string]struct{})
+	for _, spec := range SupportedProviders() {
+		normalizedProvider := strings.ToLower(strings.TrimSpace(spec.Name))
+		regions := make(map[string]struct{}, len(spec.Regions))
+		for _, supportedRegion := range spec.Regions {
+			normalizedSupportedRegion := strings.ToLower(strings.TrimSpace(supportedRegion))
+			if normalizedSupportedRegion == "" {
+				continue
+			}
+			regions[normalizedSupportedRegion] = struct{}{}
+		}
+		supported[normalizedProvider] = regions
+	}
+
+	regions, ok := supported[normalizedName]
+	if !ok {
+		return "", "", fmt.Errorf("unknown provider: %s", normalizedName)
+	}
+	if _, ok := regions[normalizedRegion]; !ok {
+		return "", "", fmt.Errorf("unsupported region %q for provider %q", normalizedRegion, normalizedName)
+	}
+
+	return normalizedName, normalizedRegion, nil
 }
 
 // ParseProviderSpec parses a "provider:region" string into name and region.
