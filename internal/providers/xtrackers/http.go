@@ -34,6 +34,7 @@ func (c *Client) doPostBrowser(ctx context.Context, url string, body []byte) ([]
 	if err != nil {
 		return nil, fmt.Errorf("failed to create stealth page: %w", err)
 	}
+	defer func() { _ = page.Close() }()
 
 	// Start navigation, which presents the cookie and role popups
 	navURL := c.config.DefaultHeaders["Referer"]
