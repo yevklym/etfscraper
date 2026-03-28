@@ -5,7 +5,7 @@ Contributions are welcome. Please read this guide before opening a pull request.
 ## Prerequisites
 
 - Go 1.26.1 or later
-- No external dependencies are needed — the library uses stdlib only
+- External dependencies should be kept to an absolute minimum (e.g., `go-rod` is used only to bypass Akamai bot protection). Heavy reliance on the Go standard library is strongly preferred.
 
 ## Getting started
 
@@ -29,4 +29,4 @@ should also be registered in the factory in `providers/open.go` and listed in `p
 ## Scope
 To keep the library focused, the following are unlikely to be accepted:
 - Provider additions without tests and fixture data
-- External dependencies
+- Heavy or unnecessary external dependencies

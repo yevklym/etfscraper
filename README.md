@@ -1,7 +1,6 @@
 # ETF Scraper
 
-`etfscraper` is a Go library for discovering ETFs and fetching fund metadata and holdings from providers. Zero external dependencies — stdlib only.
-
+`etfscraper` is a Go library for discovering ETFs and fetching fund metadata and holdings from diefferent exchange-traded fund and index mutual fund providers.
 ## Design
 
 The library has two public packages with different responsibilities:
