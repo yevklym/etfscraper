@@ -81,6 +81,7 @@ const (
 
 // ProviderName constants for supported providers.
 const (
-	ProviderIShares ProviderName = "iShares"
-	ProviderAmundi  ProviderName = "Amundi"
+	ProviderIShares   ProviderName = "iShares"
+	ProviderAmundi    ProviderName = "Amundi"
+	ProviderXtrackers ProviderName = "Xtrackers"
 )
