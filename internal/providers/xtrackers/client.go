@@ -115,14 +115,19 @@ func (c *Client) FundInfo(ctx context.Context, identifier string) (*etfscraper.F
 	return nil, fmt.Errorf("fund not found with identifier: %s", identifier)
 }
 
-// Holdings retrieves the holdings of a specific fund.
-// TODO: Not yet implemented for Xtrackers.
+// Holdings retrieves the holdings of a specific fund by ISIN.
 func (c *Client) Holdings(ctx context.Context, identifier string) (*etfscraper.HoldingsSnapshot, error) {
-	return nil, etfscraper.ErrHoldingsUnavailable
+	fund, err := c.FundInfo(ctx, identifier)
+	if err != nil {
+		return nil, fmt.Errorf("xtrackers: holdings: %w", err)
+	}
+	return c.HoldingsForFund(ctx, fund)
 }
 
 // HoldingsForFund retrieves the holdings using a previously fetched Fund.
-// TODO: Not yet implemented for Xtrackers.
 func (c *Client) HoldingsForFund(ctx context.Context, fund *etfscraper.Fund) (*etfscraper.HoldingsSnapshot, error) {
-	return nil, etfscraper.ErrHoldingsUnavailable
+	if fund == nil {
+		return nil, fmt.Errorf("fund cannot be nil")
+	}
+	return c.fetchHoldings(ctx, fund)
 }

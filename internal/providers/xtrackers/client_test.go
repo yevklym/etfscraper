@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yevklym/etfscraper"
 	"github.com/yevklym/etfscraper/internal/testutil"
 )
 
@@ -124,24 +123,15 @@ func TestCacheReuse(t *testing.T) {
 	}
 }
 
-func TestHoldingsStubs(t *testing.T) {
+func TestHoldingsForFund_NilFund_ClientTest(t *testing.T) {
 	client, err := New("uk")
 	if err != nil {
 		t.Fatalf("New() failed: %v", err)
 	}
 	ctx := context.Background()
 
-	t.Run("holdings by identifier", func(t *testing.T) {
-		_, err := client.Holdings(ctx, "IE00BK1PV551")
-		if err != etfscraper.ErrHoldingsUnavailable {
-			t.Fatalf("expected ErrHoldingsUnavailable, got: %v", err)
-		}
-	})
-
-	t.Run("holdings by fund object", func(t *testing.T) {
-		_, err := client.HoldingsForFund(ctx, nil)
-		if err != etfscraper.ErrHoldingsUnavailable {
-			t.Fatalf("expected ErrHoldingsUnavailable, got: %v", err)
-		}
-	})
+	_, err = client.HoldingsForFund(ctx, nil)
+	if err == nil {
+		t.Fatal("expected error for nil fund")
+	}
 }

@@ -101,3 +101,10 @@ func parseLaunchDate(value string) *time.Time {
 func parseLastUpdated(value string) time.Time {
 	return parseDateStr(value)
 }
+
+// normalizeWeight converts a percentage weight (e.g. 5.24 = 5.24%) to a
+// decimal fraction (0.0524). The Xtrackers API always returns weight as a
+// percentage on the 0-100 scale.
+func normalizeWeight(weight float64) float64 {
+	return weight / 100.0
+}
