@@ -116,7 +116,7 @@ func (c *Client) doPostBrowser(ctx context.Context, url string, body []byte) ([]
 				'client-id': 'passive-frontend'
 			},
 			body: body
-		}).then(res => res.text());
+		}).then(res => res.text().then(text => JSON.stringify({status: res.status, body: text})));
 	}`
 
 	result, err := page.Eval(fetchJS, url, string(body))
@@ -124,7 +124,7 @@ func (c *Client) doPostBrowser(ctx context.Context, url string, body []byte) ([]
 		return nil, fmt.Errorf("in-browser POST fetch failed: %w", err)
 	}
 
-	return []byte(result.Value.Str()), nil
+	return parseBrowserFetchResult(result.Value.Str())
 }
 
 // doGetBrowser performs a GET request via in-browser fetch after Entry Gate bypass.
@@ -144,7 +144,7 @@ func (c *Client) doGetBrowser(ctx context.Context, url string) ([]byte, error) {
 				'Accept': 'application/json',
 				'client-id': 'passive-frontend'
 			}
-		}).then(res => res.text());
+		}).then(res => res.text().then(text => JSON.stringify({status: res.status, body: text})));
 	}`
 
 	result, err := page.Eval(fetchJS, url)
@@ -152,7 +152,34 @@ func (c *Client) doGetBrowser(ctx context.Context, url string) ([]byte, error) {
 		return nil, fmt.Errorf("in-browser GET fetch failed: %w", err)
 	}
 
-	return []byte(result.Value.Str()), nil
+	return parseBrowserFetchResult(result.Value.Str())
+}
+
+// browserFetchResult holds the parsed result from an in-browser fetch call.
+type browserFetchResult struct {
+	Status int    `json:"status"`
+	Body   string `json:"body"`
+}
+
+// parseBrowserFetchResult extracts the HTTP body from the JS fetch result and
+// fails fast on non-2xx status codes.
+func parseBrowserFetchResult(raw string) ([]byte, error) {
+	var result browserFetchResult
+	if err := json.Unmarshal([]byte(raw), &result); err != nil {
+		// If JSON parsing fails, the raw string might be the body itself
+		// (e.g. if the JS snippet returned text directly). Return it as-is.
+		return []byte(raw), nil
+	}
+
+	if result.Status < 200 || result.Status >= 300 {
+		truncated := result.Body
+		if len(truncated) > 200 {
+			truncated = truncated[:200] + "..."
+		}
+		return nil, fmt.Errorf("in-browser fetch returned HTTP %d: %s", result.Status, truncated)
+	}
+
+	return []byte(result.Body), nil
 }
 
 // doPost performs a standard HTTP POST request.
