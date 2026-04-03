@@ -100,9 +100,14 @@ func (c *Client) fetchHoldings(ctx context.Context, fund *etfscraper.Fund) (*etf
 		return nil, fmt.Errorf("%w: fund %s", etfscraper.ErrHoldingsUnavailable, fund.ISIN)
 	}
 
+	asOfDate := fund.LastUpdated
+	if asOfDate.IsZero() {
+		asOfDate = time.Now().UTC()
+	}
+
 	return &etfscraper.HoldingsSnapshot{
 		Fund:          *fund,
-		AsOfDate:      fund.LastUpdated,
+		AsOfDate:      asOfDate,
 		Holdings:      holdings,
 		LastUpdated:   time.Now(),
 		TotalHoldings: len(holdings),
