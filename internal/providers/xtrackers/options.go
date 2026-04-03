@@ -77,7 +77,7 @@ func WithCacheTTL(ttl time.Duration) ClientOption {
 }
 
 // withSkipBrowserFetch is an internal option used exclusively by unit tests
-// to prevent launching a real headless browser during mocked mock responses.
+// to prevent launching a real headless browser during mock responses.
 func withSkipBrowserFetch() ClientOption {
 	return func(c *Client) {
 		c.skipBrowserFetch = true
