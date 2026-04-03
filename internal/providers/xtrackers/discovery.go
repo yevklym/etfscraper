@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/yevklym/etfscraper"
 )
@@ -108,9 +107,6 @@ func (c *Client) discoverFresh(ctx context.Context) ([]etfscraper.Fund, error) {
 
 	if c.httpConfig.Debug {
 		c.httpConfig.Logger.Printf("xtrackers: received response payload (length %d)", len(respBody))
-		if err := os.WriteFile("payload.json", respBody, 0644); err != nil {
-			c.httpConfig.Logger.Printf("xtrackers: warning: failed to write debug payload: %v", err)
-		}
 	}
 
 	var payload datatableResponse
