@@ -1,0 +1,62 @@
+{
+  "tables": [
+    {
+      "columns": [
+        {"key": "header", "value": "ISIN", "alignment": "left"},
+        {"key": "column_0", "value": "Name", "alignment": "left"},
+        {"key": "column_1", "value": "% Weight", "alignment": "right"},
+        {"key": "column_2", "value": "Market value", "alignment": "right"},
+        {"key": "column_3", "value": "Country", "alignment": "left"},
+        {"key": "column_4", "value": "Industry", "alignment": "left"},
+        {"key": "column_5", "value": "Asset class", "alignment": "left"}
+      ],
+      "values": [
+        {
+          "header": {"value": "US67066G1040", "type": "text"},
+          "column_0": {"value": "NVIDIA CORP", "type": "text"},
+          "column_1": {"value": "5.237%", "sortValue": 5.23670013, "type": "text"},
+          "column_2": {"value": "1.26 B USD", "sortValue": 1261876635.72, "type": "text"},
+          "column_3": {"value": "United States", "type": "text"},
+          "column_4": {"value": "Information Technology", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "US0378331005", "type": "text"},
+          "column_0": {"value": "APPLE INC", "type": "text"},
+          "column_1": {"value": "4.678%", "sortValue": 4.67771656, "type": "text"},
+          "column_2": {"value": "1.13 B USD", "sortValue": 1127179537.77, "type": "text"},
+          "column_3": {"value": "United States", "type": "text"},
+          "column_4": {"value": "Information Technology", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "US0231351067", "type": "text"},
+          "column_0": {"value": "AMAZON COM INC", "type": "text"},
+          "column_1": {"value": "2.514%", "sortValue": 2.51369501, "type": "text"},
+          "column_2": {"value": "605.72 M USD", "sortValue": 605719810.26, "type": "text"},
+          "column_3": {"value": "United States", "type": "text"},
+          "column_4": {"value": "Consumer Discretionary", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "JP3633400001", "type": "text"},
+          "column_0": {"value": "TOYOTA MOTOR CORP", "type": "text"},
+          "column_1": {"value": "0.351%", "sortValue": 0.35120000, "type": "text"},
+          "column_2": {"value": "84.61 M USD", "sortValue": 84610000.00, "type": "text"},
+          "column_3": {"value": "Japan", "type": "text"},
+          "column_4": {"value": "Consumer Discretionary", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "_CURRENCYUSD", "type": "text"},
+          "column_0": {"value": "US DOLLAR", "type": "text"},
+          "column_1": {"value": "0.012%", "sortValue": 0.01200000, "type": "text"},
+          "column_2": {"value": "2.89 M USD", "sortValue": 2890000.00, "type": "text"},
+          "column_3": {"value": "", "type": "text"},
+          "column_4": {"value": "", "type": "text"},
+          "column_5": {"value": "Cash and/or Derivatives", "type": "text"}
+        }
+      ]
+    }
+  ]
+}
