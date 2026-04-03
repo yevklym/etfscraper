@@ -12,10 +12,11 @@ In typical usage, import both packages: use `providers` to construct a provider,
 
 ## Supported Providers
 
-| Provider | Regions        |
-|----------|----------------|
-| iShares  | us, de, uk, fr |
-| Amundi   | de, uk, fr     |
+| Provider  | Regions        |
+|-----------|----------------|
+| iShares   | us, de, uk, fr |
+| Amundi    | de, uk, fr     |
+| Xtrackers | de, uk         |
 
 ## Installation
 
