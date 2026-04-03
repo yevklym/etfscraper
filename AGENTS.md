@@ -5,7 +5,7 @@ Also see `.github/copilot-instructions.md` and `.github/go.instructions.md` for 
 
 ## Project Overview
 
-`etfscraper` is a Go 1.26 library (module `github.com/yevklym/etfscraper`) that discovers ETFs and fetches fund metadata and holdings for providers like iShares and Amundi. It has **zero external dependencies** -- stdlib only.
+`etfscraper` is a Go 1.26 library (module `github.com/yevklym/etfscraper`) that discovers ETFs and fetches fund metadata and holdings for providers like iShares, Amundi, and Xtrackers. It uses `github.com/go-rod/rod` to bypass advanced bot protection (e.g., Akamai), but otherwise relies heavily on the Go standard library.
 
 ## Build / Test / Lint Commands
 
@@ -76,7 +76,7 @@ import (
 )
 ```
 
-No external dependencies exist. If added, use three groups: stdlib, external, internal.
+External dependencies (like `github.com/go-rod/rod`) are allowed when necessary for bot-protection bypass. Use three import groups: stdlib, external, internal.
 
 ### Naming
 

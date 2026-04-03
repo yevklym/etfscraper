@@ -11,6 +11,7 @@ import (
 	"github.com/yevklym/etfscraper"
 	"github.com/yevklym/etfscraper/internal/providers/amundi"
 	"github.com/yevklym/etfscraper/internal/providers/ishares"
+	"github.com/yevklym/etfscraper/internal/providers/xtrackers"
 )
 
 // ProviderSpec describes a provider and its supported regions.
@@ -50,6 +51,16 @@ var providerRegistry = map[string]providerFactory{
 				isharesOpts = append(isharesOpts, ishares.WithCacheTTL(*options.cacheTTL))
 			}
 			return ishares.New(region, isharesOpts...)
+		},
+	),
+	"xtrackers": newProviderFactory(
+		xtrackers.SupportedRegions(),
+		func(region string, options providerOptions) (etfscraper.Provider, error) {
+			xOpts := []xtrackers.ClientOption{xtrackers.WithHTTPConfig(options.httpConfig)}
+			if options.cacheTTL != nil {
+				xOpts = append(xOpts, xtrackers.WithCacheTTL(*options.cacheTTL))
+			}
+			return xtrackers.New(region, xOpts...)
 		},
 	),
 }

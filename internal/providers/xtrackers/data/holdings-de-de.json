@@ -1,0 +1,80 @@
+{
+  "tables": [
+    {
+      "columns": [
+        {"key": "header", "value": "ISIN", "alignment": "left"},
+        {"key": "column_0", "value": "Name", "alignment": "left"},
+        {"key": "column_1", "value": "Gewichtung %", "alignment": "right"},
+        {"key": "column_2", "value": "Marktwert", "alignment": "right"},
+        {"key": "column_3", "value": "Land", "alignment": "left"},
+        {"key": "column_4", "value": "Industrie", "alignment": "left"},
+        {"key": "column_5", "value": "Anlageklasse", "alignment": "left"}
+      ],
+      "values": [
+        {
+          "header": {"value": "US67066G1040", "type": "text"},
+          "column_0": {"value": "NVIDIA CORP", "type": "text"},
+          "column_1": {"value": "5,237%", "sortValue": 5.23670013, "type": "text"},
+          "column_2": {"value": "1,26 Mrd. USD", "sortValue": 1261876635.72, "type": "text"},
+          "column_3": {"value": "Vereinigte Staaten von Amerika", "type": "text"},
+          "column_4": {"value": "Informationstechnologie", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "US0378331005", "type": "text"},
+          "column_0": {"value": "APPLE INC", "type": "text"},
+          "column_1": {"value": "4,678%", "sortValue": 4.67771656, "type": "text"},
+          "column_2": {"value": "1,13 Mrd. USD", "sortValue": 1127179537.77, "type": "text"},
+          "column_3": {"value": "Vereinigte Staaten von Amerika", "type": "text"},
+          "column_4": {"value": "Informationstechnologie", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "US5949181045", "type": "text"},
+          "column_0": {"value": "MICROSOFT CORP", "type": "text"},
+          "column_1": {"value": "3,252%", "sortValue": 3.25223151, "type": "text"},
+          "column_2": {"value": "783,68 Mio. USD", "sortValue": 783683400.39, "type": "text"},
+          "column_3": {"value": "Vereinigte Staaten von Amerika", "type": "text"},
+          "column_4": {"value": "Informationstechnologie", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "US0231351067", "type": "text"},
+          "column_0": {"value": "AMAZON COM INC", "type": "text"},
+          "column_1": {"value": "2,514%", "sortValue": 2.51369501, "type": "text"},
+          "column_2": {"value": "605,72 Mio. USD", "sortValue": 605719810.26, "type": "text"},
+          "column_3": {"value": "Vereinigte Staaten von Amerika", "type": "text"},
+          "column_4": {"value": "Nicht-Basiskonsumgüter", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "US46625H1005", "type": "text"},
+          "column_0": {"value": "JPMORGAN CHASE", "type": "text"},
+          "column_1": {"value": "0,999%", "sortValue": 0.99871635, "type": "text"},
+          "column_2": {"value": "240,66 Mio. USD", "sortValue": 240658582.44, "type": "text"},
+          "column_3": {"value": "Vereinigte Staaten von Amerika", "type": "text"},
+          "column_4": {"value": "Finanzen", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "JP3633400001", "type": "text"},
+          "column_0": {"value": "TOYOTA MOTOR CORP", "type": "text"},
+          "column_1": {"value": "0,351%", "sortValue": 0.35120000, "type": "text"},
+          "column_2": {"value": "84,61 Mio. USD", "sortValue": 84610000.00, "type": "text"},
+          "column_3": {"value": "Japan", "type": "text"},
+          "column_4": {"value": "Nicht-Basiskonsumgüter", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "_CURRENCYUSD", "type": "text"},
+          "column_0": {"value": "US DOLLAR", "type": "text"},
+          "column_1": {"value": "0,012%", "sortValue": 0.01200000, "type": "text"},
+          "column_2": {"value": "2,89 Mio. USD", "sortValue": 2890000.00, "type": "text"},
+          "column_3": {"value": "", "type": "text"},
+          "column_4": {"value": "", "type": "text"},
+          "column_5": {"value": "Cash und/oder Derivate", "type": "text"}
+        }
+      ]
+    }
+  ]
+}
