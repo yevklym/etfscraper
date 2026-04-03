@@ -3,6 +3,7 @@ package xtrackers
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,8 +26,6 @@ func (c *Client) bypassEntryGate(page *rod.Page) {
 	}
 
 	// Wait for the page DOM to render enough for the Entry Gate modals.
-	// We cannot use WaitLoad() because DWS pages load infinite tracking pixels
-	// which prevents the browser "load" event from ever firing.
 	time.Sleep(3 * time.Second)
 
 	// 1. Accept cookies — use JS eval to find and click the button by text content.
