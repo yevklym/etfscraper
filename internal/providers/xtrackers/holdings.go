@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -67,6 +68,10 @@ func (c *Client) fetchHoldings(ctx context.Context, fund *etfscraper.Fund) (*etf
 				c.httpConfig.Logger.Printf("Warning: failed to close response body: %v", closeErr)
 			}
 		}()
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("xtrackers: holdings: HTTP %d: %s", resp.StatusCode, resp.Status)
+		}
 
 		bodyBytes, err := readAll(resp.Body)
 		if err != nil {
