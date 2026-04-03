@@ -13,6 +13,7 @@ type regionConfig struct {
 	Locale            string
 	DefaultHeaders    map[string]string
 	AssetClassMapping map[string]etfscraper.AssetClass
+	SectorMapping     map[string]etfscraper.Sector
 }
 
 var regionConfigs = map[string]regionConfig{
@@ -31,7 +32,25 @@ var regionConfigs = map[string]regionConfig{
 			"Sec-Fetch-Mode": "cors",
 			"Sec-Fetch-Dest": "empty",
 		},
-		AssetClassMapping: defaultAssetClassMapping(),
+		AssetClassMapping: map[string]etfscraper.AssetClass{
+			"aktien":    etfscraper.AssetClassEquity,
+			"renten":    etfscraper.AssetClassBond,
+			"rohstoffe": etfscraper.AssetClassCommodity,
+			"equity":    etfscraper.AssetClassEquity,
+		},
+		SectorMapping: map[string]etfscraper.Sector{
+			"energie":                 etfscraper.SectorEnergy,
+			"material":                etfscraper.SectorMaterials,
+			"industrieunternehmen":    etfscraper.SectorIndustrials,
+			"nicht-basiskonsumgüter":  etfscraper.SectorConsumerDiscretionary,
+			"basiskonsumgüter":        etfscraper.SectorConsumerStaples,
+			"gesundheitswesen":        etfscraper.SectorHealthcare,
+			"finanzen":                etfscraper.SectorFinancials,
+			"informationstechnologie": etfscraper.SectorInformationTechnology,
+			"kommunikationsdienste":   etfscraper.SectorTelecommunication,
+			"versorgungsunternehmen":  etfscraper.SectorUtilities,
+			"immobilien":              etfscraper.SectorRealEstate,
+		},
 	},
 	"uk": {
 		BaseURL:       "https://etf.dws.com",
@@ -48,23 +67,28 @@ var regionConfigs = map[string]regionConfig{
 			"Sec-Fetch-Mode": "cors",
 			"Sec-Fetch-Dest": "empty",
 		},
-		AssetClassMapping: defaultAssetClassMapping(),
+		AssetClassMapping: map[string]etfscraper.AssetClass{
+			"equities":     etfscraper.AssetClassEquity,
+			"fixed income": etfscraper.AssetClassBond,
+			"commodities":  etfscraper.AssetClassCommodity,
+			"multi asset":  etfscraper.AssetClassAlternative,
+			"alternatives": etfscraper.AssetClassAlternative,
+			"equity":       etfscraper.AssetClassEquity,
+		},
+		SectorMapping: map[string]etfscraper.Sector{
+			"energy":                 etfscraper.SectorEnergy,
+			"materials":              etfscraper.SectorMaterials,
+			"industrials":            etfscraper.SectorIndustrials,
+			"consumer discretionary": etfscraper.SectorConsumerDiscretionary,
+			"consumer staples":       etfscraper.SectorConsumerStaples,
+			"health care":            etfscraper.SectorHealthcare,
+			"financials":             etfscraper.SectorFinancials,
+			"information technology": etfscraper.SectorInformationTechnology,
+			"communication services": etfscraper.SectorTelecommunication,
+			"utilities":              etfscraper.SectorUtilities,
+			"real estate":            etfscraper.SectorRealEstate,
+		},
 	},
-}
-
-func defaultAssetClassMapping() map[string]etfscraper.AssetClass {
-	return map[string]etfscraper.AssetClass{
-		// English
-		"equities":     etfscraper.AssetClassEquity,
-		"fixed income": etfscraper.AssetClassBond,
-		"commodities":  etfscraper.AssetClassCommodity,
-		"multi asset":  etfscraper.AssetClassAlternative,
-		"alternatives": etfscraper.AssetClassAlternative,
-		// German
-		"aktien":    etfscraper.AssetClassEquity,
-		"renten":    etfscraper.AssetClassBond,
-		"rohstoffe": etfscraper.AssetClassCommodity,
-	}
 }
 
 // discoveryRequestBody returns the exact JSON payload expected by the /datatable API.

@@ -36,6 +36,20 @@ func normalizeAssetClass(value string, mapping map[string]etfscraper.AssetClass)
 	return etfscraper.AssetClass(trimmed)
 }
 
+// normalizeSector maps a locale-specific sector string to a canonical Sector constant.
+func normalizeSector(value string, mapping map[string]etfscraper.Sector) etfscraper.Sector {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return ""
+	}
+
+	if s, ok := mapping[strings.ToLower(trimmed)]; ok {
+		return s
+	}
+
+	return etfscraper.Sector(trimmed)
+}
+
 // isDistributing returns whether the fund distributes based on the UseOfProfit field.
 func isDistributing(useOfProfit string) bool {
 	lower := strings.ToLower(strings.TrimSpace(useOfProfit))

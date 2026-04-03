@@ -64,7 +64,7 @@ func TestHoldingsForFund(t *testing.T) {
 			wantWeight:      0.0523670013,
 			wantMarketValue: 1261876635.72,
 			wantLocation:    "Vereinigte Staaten von Amerika",
-			wantSector:      "Informationstechnologie",
+			wantSector:      "Information Technology",
 			wantAssetClass:  etfscraper.AssetClassEquity,
 		},
 		{
@@ -74,7 +74,7 @@ func TestHoldingsForFund(t *testing.T) {
 			wantWeight:      0.0099871635,
 			wantMarketValue: 240658582.44,
 			wantLocation:    "Vereinigte Staaten von Amerika",
-			wantSector:      "Finanzen",
+			wantSector:      "Financials",
 			wantAssetClass:  etfscraper.AssetClassEquity,
 		},
 		{
@@ -84,7 +84,7 @@ func TestHoldingsForFund(t *testing.T) {
 			wantWeight:      0.003512,
 			wantMarketValue: 84610000.00,
 			wantLocation:    "Japan",
-			wantSector:      "Nicht-Basiskonsumgüter",
+			wantSector:      "Consumer Discretionary",
 			wantAssetClass:  etfscraper.AssetClassEquity,
 		},
 		{
