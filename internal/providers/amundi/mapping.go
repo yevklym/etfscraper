@@ -121,6 +121,20 @@ func normalizeSector(value string, mapping map[string]etfscraper.Sector) etfscra
 	return etfscraper.Sector(trimmed)
 }
 
+// normalizeLocation maps a locale-specific location string to a canonical Location constant
+func normalizeLocation(value string, mapping map[string]etfscraper.Location) etfscraper.Location {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return ""
+	}
+
+	if l, ok := mapping[strings.ToLower(trimmed)]; ok {
+		return l
+	}
+
+	return etfscraper.Location(trimmed)
+}
+
 func isDistributing(policy string) bool {
 	trimmed := strings.TrimSpace(policy)
 	if trimmed == "" {

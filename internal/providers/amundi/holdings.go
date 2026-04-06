@@ -239,7 +239,7 @@ func (c *Client) convertHoldings(items []compositionItem, fundTotalAssets float6
 			Currency:    mapCurrency(item.Currency),
 			Sector:      normalizeSector(item.Sector, c.config.SectorMapping),
 			AssetClass:  normalizeAssetClass(item.Type, c.config.AssetClassMapping),
-			Location:    etfscraper.Location(item.CountryOfRisk),
+			Location:    normalizeLocation(item.CountryOfRisk, c.config.LocationMapping),
 		}
 
 		holdings = append(holdings, holding)

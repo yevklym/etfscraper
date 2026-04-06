@@ -102,6 +102,39 @@ func TestNormalizeSector_AllRegions(t *testing.T) {
 	}
 }
 
+func TestNormalizeLocation_AllRegions(t *testing.T) {
+	tests := []struct {
+		name     string
+		region   string
+		input    string
+		expected etfscraper.Location
+	}{
+		{name: "US", region: "de", input: "United States", expected: etfscraper.LocationUnitedStates},
+		{name: "UK", region: "de", input: "United Kingdom", expected: etfscraper.LocationUnitedKingdom},
+		{name: "Japan", region: "de", input: "Japan", expected: etfscraper.LocationJapan},
+		{name: "Germany", region: "uk", input: "Germany", expected: etfscraper.LocationGermany},
+		{name: "France", region: "fr", input: "France", expected: etfscraper.LocationFrance},
+		{name: "lowercase", region: "de", input: "united states", expected: etfscraper.LocationUnitedStates},
+		{name: "whitespace", region: "uk", input: "  Japan  ", expected: etfscraper.LocationJapan},
+		{name: "unknown passthrough", region: "de", input: "Vietnam", expected: etfscraper.Location("Vietnam")},
+		{name: "empty string", region: "de", input: "", expected: ""},
+		{name: "nil mapping", region: "unknown", input: "United States", expected: etfscraper.Location("United States")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var mapping map[string]etfscraper.Location
+			if cfg, ok := regionConfigs[tt.region]; ok {
+				mapping = cfg.LocationMapping
+			}
+			got := normalizeLocation(tt.input, mapping)
+			if got != tt.expected {
+				t.Errorf("normalizeLocation(%q) = %q, want %q", tt.input, got, tt.expected)
+			}
+		})
+	}
+}
+
 func TestMapCurrency(t *testing.T) {
 	tests := []struct {
 		name  string
