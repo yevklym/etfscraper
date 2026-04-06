@@ -128,7 +128,7 @@ func (c *Client) convertHoldings(entries []holdingsEntry) []etfscraper.Holding {
 			Name:        name,
 			Weight:      normalizeWeight(e.Column1.SortValue),
 			MarketValue: e.Column2.SortValue,
-			Location:    etfscraper.Location(strings.TrimSpace(e.Column3.Value)),
+			Location:    normalizeLocation(e.Column3.Value, c.config.LocationMapping),
 			Sector:      normalizeSector(e.Column4.Value, c.config.SectorMapping),
 			AssetClass:  normalizeAssetClass(e.Column5.Value, c.config.AssetClassMapping),
 		}

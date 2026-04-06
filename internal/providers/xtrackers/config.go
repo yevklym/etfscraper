@@ -14,6 +14,7 @@ type regionConfig struct {
 	DefaultHeaders    map[string]string
 	AssetClassMapping map[string]etfscraper.AssetClass
 	SectorMapping     map[string]etfscraper.Sector
+	LocationMapping   map[string]etfscraper.Location
 }
 
 var regionConfigs = map[string]regionConfig{
@@ -51,6 +52,35 @@ var regionConfigs = map[string]regionConfig{
 			"versorgungsunternehmen":  etfscraper.SectorUtilities,
 			"immobilien":              etfscraper.SectorRealEstate,
 		},
+		LocationMapping: map[string]etfscraper.Location{
+			"vereinigte staaten von amerika": etfscraper.LocationUnitedStates,
+			"vereinigte staaten":             etfscraper.LocationUnitedStates,
+			"vereinigtes königreich":         etfscraper.LocationUnitedKingdom,
+			"großbritannien (uk)":            etfscraper.LocationUnitedKingdom,
+			"japan":                          etfscraper.LocationJapan,
+			"deutschland":                    etfscraper.LocationGermany,
+			"frankreich":                     etfscraper.LocationFrance,
+			"france":                         etfscraper.LocationFrance,
+			"schweiz":                        etfscraper.LocationSwitzerland,
+			"kanada":                         etfscraper.LocationCanada,
+			"australien":                     etfscraper.LocationAustralia,
+			"china":                          etfscraper.LocationChina,
+			"taiwan":                         etfscraper.LocationTaiwan,
+			"südkorea":                       etfscraper.LocationSouthKorea,
+			"indien":                         etfscraper.LocationIndia,
+			"brasilien":                      etfscraper.LocationBrazil,
+			"niederlande":                    etfscraper.LocationNetherlands,
+			"schweden":                       etfscraper.LocationSweden,
+			"italien":                        etfscraper.LocationItaly,
+			"spanien":                        etfscraper.LocationSpain,
+			"spain":                          etfscraper.LocationSpain,
+			"irland":                         etfscraper.LocationIreland,
+			"dänemark":                       etfscraper.LocationDenmark,
+			"finnland":                       etfscraper.LocationFinland,
+			"europäische union":              etfscraper.LocationEurope,
+			"european union":                 etfscraper.LocationEurope,
+			"cash und/oder derivate":         etfscraper.LocationCash,
+		},
 	},
 	"uk": {
 		BaseURL:       "https://etf.dws.com",
@@ -87,6 +117,29 @@ var regionConfigs = map[string]regionConfig{
 			"communication services": etfscraper.SectorTelecommunication,
 			"utilities":              etfscraper.SectorUtilities,
 			"real estate":            etfscraper.SectorRealEstate,
+		},
+		LocationMapping: map[string]etfscraper.Location{
+			"united states":           etfscraper.LocationUnitedStates,
+			"united kingdom":          etfscraper.LocationUnitedKingdom,
+			"japan":                   etfscraper.LocationJapan,
+			"germany":                 etfscraper.LocationGermany,
+			"france":                  etfscraper.LocationFrance,
+			"switzerland":             etfscraper.LocationSwitzerland,
+			"canada":                  etfscraper.LocationCanada,
+			"australia":               etfscraper.LocationAustralia,
+			"china":                   etfscraper.LocationChina,
+			"taiwan":                  etfscraper.LocationTaiwan,
+			"south korea":             etfscraper.LocationSouthKorea,
+			"india":                   etfscraper.LocationIndia,
+			"brazil":                  etfscraper.LocationBrazil,
+			"netherlands":             etfscraper.LocationNetherlands,
+			"sweden":                  etfscraper.LocationSweden,
+			"italy":                   etfscraper.LocationItaly,
+			"spain":                   etfscraper.LocationSpain,
+			"ireland":                 etfscraper.LocationIreland,
+			"denmark":                 etfscraper.LocationDenmark,
+			"finland":                 etfscraper.LocationFinland,
+			"cash and/or derivatives": etfscraper.LocationCash,
 		},
 	},
 }
