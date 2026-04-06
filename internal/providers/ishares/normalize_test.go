@@ -161,6 +161,51 @@ func TestNormalizeSector_AllRegions(t *testing.T) {
 	}
 }
 
+func TestNormalizeLocation_AllRegions(t *testing.T) {
+	tests := []struct {
+		name     string
+		region   string
+		input    string
+		expected etfscraper.Location
+	}{
+		// English (US, UK)
+		{name: "us english", region: "us", input: "United States", expected: etfscraper.LocationUnitedStates},
+		{name: "uk english", region: "uk", input: "United Kingdom", expected: etfscraper.LocationUnitedKingdom},
+		{name: "japan english", region: "us", input: "Japan", expected: etfscraper.LocationJapan},
+
+		// German (DE)
+		{name: "us german", region: "de", input: "Vereinigte Staaten", expected: etfscraper.LocationUnitedStates},
+		{name: "germany german", region: "de", input: "Deutschland", expected: etfscraper.LocationGermany},
+		{name: "japan german", region: "de", input: "Japan", expected: etfscraper.LocationJapan},
+
+		// French (FR)
+		{name: "us french", region: "fr", input: "États-unis", expected: etfscraper.LocationUnitedStates},
+		{name: "france french", region: "fr", input: "France", expected: etfscraper.LocationFrance},
+		{name: "japan french", region: "fr", input: "Japon", expected: etfscraper.LocationJapan},
+
+		// Edge cases
+		{name: "empty string", region: "us", input: "", expected: ""},
+		{name: "dash", region: "us", input: "-", expected: ""},
+		{name: "whitespace", region: "us", input: "  Japan  ", expected: etfscraper.LocationJapan},
+		{name: "case insensitive", region: "us", input: "UNITED STATES", expected: etfscraper.LocationUnitedStates},
+		{name: "unknown passthrough", region: "us", input: "Vietnam", expected: etfscraper.Location("Vietnam")},
+		{name: "nil mapping", region: "", input: "Japan", expected: etfscraper.Location("Japan")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var mapping map[string]etfscraper.Location
+			if cfg, ok := regionConfigs[tt.region]; ok {
+				mapping = cfg.LocationMapping
+			}
+			got := normalizeLocation(tt.input, mapping)
+			if got != tt.expected {
+				t.Errorf("normalizeLocation(%q) = %q, want %q", tt.input, got, tt.expected)
+			}
+		})
+	}
+}
+
 func TestNormalizeExchange_CommonMappings(t *testing.T) {
 	tests := []struct {
 		name     string

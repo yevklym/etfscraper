@@ -165,8 +165,8 @@ func TestParseHoldings_FrenchFormat(t *testing.T) {
 	if nvidia.AssetClass != etfscraper.AssetClassEquity {
 		t.Errorf("Expected asset class %s, got %s", etfscraper.AssetClassEquity, nvidia.AssetClass)
 	}
-	if nvidia.Location != "Etats-Unis" {
-		t.Errorf("Expected location Etats-Unis, got %s", nvidia.Location)
+	if nvidia.Location != "United States" {
+		t.Errorf("Expected location United States, got %s", nvidia.Location)
 	}
 	if nvidia.Currency != etfscraper.CurrencyUSD {
 		t.Errorf("Expected currency USD, got %s", nvidia.Currency)
