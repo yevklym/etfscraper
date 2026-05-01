@@ -17,6 +17,9 @@ var holdingsResponseDE string
 //go:embed data/holdings-en-gb.json
 var holdingsResponseGB string
 
+//go:embed data/holdings-fr-fr.json
+var holdingsResponseFR string
+
 func TestHoldingsForFund(t *testing.T) {
 	client, err := New("de",
 		WithHTTPClient(&testutil.MockHTTPClient{
@@ -257,6 +260,116 @@ func TestHoldingsForFund_UK(t *testing.T) {
 	}
 }
 
+func TestHoldingsForFund_FR(t *testing.T) {
+	client, err := New("fr",
+		WithHTTPClient(&testutil.MockHTTPClient{
+			StatusCode:   http.StatusOK,
+			ResponseBody: holdingsResponseFR,
+		}),
+		withSkipBrowserFetch(),
+	)
+	if err != nil {
+		t.Fatalf("New() failed: %v", err)
+	}
+
+	fund := &etfscraper.Fund{
+		ISIN:     "IE00BJ0KDQ92",
+		Name:     "Xtrackers MSCI World UCITS ETF 1C",
+		Provider: etfscraper.ProviderXtrackers,
+		ProviderMetadata: fundMetadata{
+			ProductURL: "/fr-fr/IE00BJ0KDQ92-msci-world-ucits-etf-1c/",
+		},
+	}
+
+	snapshot, err := client.HoldingsForFund(context.Background(), fund)
+	if err != nil {
+		t.Fatalf("HoldingsForFund() failed: %v", err)
+	}
+
+	if snapshot.TotalHoldings != 7 {
+		t.Fatalf("expected 7 holdings, got %d", snapshot.TotalHoldings)
+	}
+
+	tests := []struct {
+		name           string
+		isin           string
+		wantName       string
+		wantLocation   string
+		wantSector     string
+		wantAssetClass etfscraper.AssetClass
+	}{
+		{
+			name:           "nvidia french locale",
+			isin:           "US67066G1040",
+			wantName:       "NVIDIA CORP",
+			wantLocation:   "United States",
+			wantSector:     "Information Technology",
+			wantAssetClass: etfscraper.AssetClassEquity,
+		},
+		{
+			name:           "amazon french consumer discretionary",
+			isin:           "US0231351067",
+			wantName:       "AMAZON COM INC",
+			wantLocation:   "United States",
+			wantSector:     "Consumer Discretionary",
+			wantAssetClass: etfscraper.AssetClassEquity,
+		},
+		{
+			name:           "toyota japon",
+			isin:           "JP3633400001",
+			wantName:       "TOYOTA MOTOR CORP",
+			wantLocation:   "Japan",
+			wantSector:     "Consumer Discretionary",
+			wantAssetClass: etfscraper.AssetClassEquity,
+		},
+		{
+			name:           "jpmorgan finance french",
+			isin:           "US46625H1005",
+			wantName:       "JPMORGAN CHASE",
+			wantLocation:   "United States",
+			wantSector:     "Financials",
+			wantAssetClass: etfscraper.AssetClassEquity,
+		},
+		{
+			name:           "asml pays-bas",
+			isin:           "NL0010273215",
+			wantName:       "ASML HOLDING NV",
+			wantLocation:   "Netherlands",
+			wantSector:     "Information Technology",
+			wantAssetClass: etfscraper.AssetClassEquity,
+		},
+		{
+			name:           "cash french",
+			isin:           "_CURRENCYUSD",
+			wantName:       "US DOLLAR",
+			wantLocation:   "",
+			wantSector:     "",
+			wantAssetClass: etfscraper.AssetClassCash,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			found := findHoldingByISIN(snapshot.Holdings, tt.isin)
+			if found == nil {
+				t.Fatalf("holding %s not found", tt.isin)
+			}
+			if found.Name != tt.wantName {
+				t.Errorf("name = %q, want %q", found.Name, tt.wantName)
+			}
+			if string(found.Location) != tt.wantLocation {
+				t.Errorf("location = %q, want %q", found.Location, tt.wantLocation)
+			}
+			if string(found.Sector) != tt.wantSector {
+				t.Errorf("sector = %q, want %q", found.Sector, tt.wantSector)
+			}
+			if found.AssetClass != tt.wantAssetClass {
+				t.Errorf("asset class = %q, want %q", found.AssetClass, tt.wantAssetClass)
+			}
+		})
+	}
+}
+
 func TestHoldingsURL(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -275,6 +388,12 @@ func TestHoldingsURL(t *testing.T) {
 			region:     "uk",
 			productURL: "/en-gb/IE00BK1PV551-msci-world-ucits-etf-1d/",
 			want:       "https://etf.dws.com/api/pdp/en-gb/etf/IE00BK1PV551-msci-world-ucits-etf-1d/holdings",
+		},
+		{
+			name:       "FR normal URL",
+			region:     "fr",
+			productURL: "/fr-fr/IE00BJ0KDQ92-msci-world-ucits-etf-1c/",
+			want:       "https://etf.dws.com/api/pdp/fr-fr/etf/IE00BJ0KDQ92-msci-world-ucits-etf-1c/holdings",
 		},
 		{
 			name:       "no trailing slash",

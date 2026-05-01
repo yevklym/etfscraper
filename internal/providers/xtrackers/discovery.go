@@ -58,7 +58,7 @@ type column0NameValue struct {
 }
 
 func (c *Client) discoverFresh(ctx context.Context) ([]etfscraper.Fund, error) {
-	body, err := json.Marshal(discoveryRequestBody())
+	body, err := json.Marshal(c.config.DiscoveryBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
@@ -142,7 +142,7 @@ func (c *Client) convertToFunds(entries []datatableEntry) []etfscraper.Fund {
 			ExpenseRatio:   parseTER(e.TotalExpenseRatio.Value),
 			TotalAssets:    parseAUM(e.AssetUnderManagement.SortValue),
 			AssetClass:     normalizeAssetClass(e.AssetClass.Value, c.config.AssetClassMapping),
-			IsDistributing: isDistributing(e.UseOfProfit.Value),
+			IsDistributing: isDistributing(e.UseOfProfit.Value, c.config.DistributionTerms),
 			InceptionDate:  parseLaunchDate(e.FundLaunchDate.Value),
 			LastUpdated:    parseLastUpdated(e.PerformanceDate.Value),
 		}

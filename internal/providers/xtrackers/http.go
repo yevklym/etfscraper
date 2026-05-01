@@ -30,28 +30,27 @@ func (c *Client) bypassEntryGate(page *rod.Page) {
 
 	// 1. Accept cookies — use JS eval to find and click the button by text content.
 	// This approach reliably triggers React's synthetic event handlers.
-	if _, err := page.Eval(`() => {
+	// The cookie accept texts are locale-specific and come from regionConfig.
+	if _, err := page.Eval(`(texts) => {
 		const btns = Array.from(document.querySelectorAll('button'));
 		const acceptBtn = btns.find(b =>
-			b.innerText.includes('Accept all cookies') ||
-			b.innerText.includes('Alle Cookies akzeptieren'));
+			texts.some(t => b.innerText.includes(t)));
 		if (acceptBtn) acceptBtn.click();
-	}`); err != nil && c.httpConfig.Debug {
+	}`, c.config.CookieAcceptTexts); err != nil && c.httpConfig.Debug {
 		c.httpConfig.Logger.Printf("xtrackers: cookie accept eval: %v", err)
 	}
 
 	time.Sleep(1 * time.Second)
 
-	// 2. Select Retail Investor role (Privat / Private)
-	if _, err := page.Eval(`() => {
+	// 2. Select Retail Investor role.
+	// The role texts are locale-specific and come from regionConfig.
+	if _, err := page.Eval(`(texts) => {
 		const labels = Array.from(document.querySelectorAll('*'));
 		const role = labels.find(el =>
 			el.innerText &&
-			(el.innerText.trim() === 'Privat' ||
-			 el.innerText.trim() === 'Private' ||
-			 el.innerText.trim() === 'Private Investor'));
+			texts.some(t => el.innerText.trim() === t));
 		if (role) role.parentElement.click();
-	}`); err != nil && c.httpConfig.Debug {
+	}`, c.config.RoleTexts); err != nil && c.httpConfig.Debug {
 		c.httpConfig.Logger.Printf("xtrackers: role select eval: %v", err)
 	}
 

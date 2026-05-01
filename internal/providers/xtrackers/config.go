@@ -12,9 +12,13 @@ type regionConfig struct {
 	DiscoveryPath     string
 	Locale            string
 	DefaultHeaders    map[string]string
+	CookieAcceptTexts []string // button texts for cookie consent (matched via includes)
+	RoleTexts         []string // element texts for investor role selection (matched via exact trim)
 	AssetClassMapping map[string]etfscraper.AssetClass
 	SectorMapping     map[string]etfscraper.Sector
 	LocationMapping   map[string]etfscraper.Location
+	DistributionTerms []string // substrings that indicate a distributing fund (UseOfProfit field)
+	DiscoveryBody     map[string]any
 }
 
 var regionConfigs = map[string]regionConfig{
@@ -33,11 +37,18 @@ var regionConfigs = map[string]regionConfig{
 			"Sec-Fetch-Mode": "cors",
 			"Sec-Fetch-Dest": "empty",
 		},
+		CookieAcceptTexts: []string{"Alle Cookies akzeptieren", "Accept all cookies"},
+		RoleTexts:         []string{"Privat"},
+		DistributionTerms: []string{"distributing", "ausschüttend", "distribution"},
 		AssetClassMapping: map[string]etfscraper.AssetClass{
 			"aktien":    etfscraper.AssetClassEquity,
 			"renten":    etfscraper.AssetClassBond,
 			"rohstoffe": etfscraper.AssetClassCommodity,
 			"equity":    etfscraper.AssetClassEquity,
+		},
+		DiscoveryBody: map[string]any{
+			"searchTerm": "",
+			"filters":    []any{},
 		},
 		SectorMapping: map[string]etfscraper.Sector{
 			"energie":                 etfscraper.SectorEnergy,
@@ -125,6 +136,9 @@ var regionConfigs = map[string]regionConfig{
 			"Sec-Fetch-Mode": "cors",
 			"Sec-Fetch-Dest": "empty",
 		},
+		CookieAcceptTexts: []string{"Accept all cookies", "Alle Cookies akzeptieren"},
+		RoleTexts:         []string{"Private", "Private Investor"},
+		DistributionTerms: []string{"distributing"},
 		AssetClassMapping: map[string]etfscraper.AssetClass{
 			"equities":     etfscraper.AssetClassEquity,
 			"fixed income": etfscraper.AssetClassBond,
@@ -132,6 +146,10 @@ var regionConfigs = map[string]regionConfig{
 			"multi asset":  etfscraper.AssetClassAlternative,
 			"alternatives": etfscraper.AssetClassAlternative,
 			"equity":       etfscraper.AssetClassEquity,
+		},
+		DiscoveryBody: map[string]any{
+			"searchTerm": "",
+			"filters":    []any{},
 		},
 		SectorMapping: map[string]etfscraper.Sector{
 			"energy":                 etfscraper.SectorEnergy,
@@ -177,14 +195,103 @@ var regionConfigs = map[string]regionConfig{
 			"cash and/or derivatives": etfscraper.LocationCash,
 		},
 	},
-}
-
-// discoveryRequestBody returns the exact JSON payload expected by the /datatable API.
-func discoveryRequestBody() map[string]any {
-	return map[string]any{
-		"searchTerm": "",
-		"filters":    []any{},
-	}
+	"fr": {
+		BaseURL:       "https://etf.dws.com",
+		DiscoveryPath: "/api/fundfinder/%s/datatable",
+		Locale:        "fr-fr",
+		DefaultHeaders: map[string]string{
+			"Content-Type":   "application/json",
+			"Accept":         "application/json",
+			"client-id":      "passive-frontend",
+			"User-Agent":     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15",
+			"Origin":         "https://etf.dws.com",
+			"Referer":        "https://etf.dws.com/fr-fr/rechercher-des-produits/",
+			"Sec-Fetch-Site": "same-origin",
+			"Sec-Fetch-Mode": "cors",
+			"Sec-Fetch-Dest": "empty",
+		},
+		CookieAcceptTexts: []string{"Accept all cookies", "Alle Cookies akzeptieren"},
+		RoleTexts:         []string{"Particuliers"},
+		DistributionTerms: []string{"distribution"},
+		AssetClassMapping: map[string]etfscraper.AssetClass{
+			"actions":            etfscraper.AssetClassEquity,
+			"obligations":        etfscraper.AssetClassBond,
+			"matières premières": etfscraper.AssetClassCommodity,
+			"equity":             etfscraper.AssetClassEquity,
+			"cash":               etfscraper.AssetClassCash,
+		},
+		DiscoveryBody: map[string]any{
+			"selectedTabIndex": 0,
+			"totalReturnType":  0,
+			"searchTerm":       "",
+			"filters":          []any{},
+		},
+		SectorMapping: map[string]etfscraper.Sector{
+			"énergie":                       etfscraper.SectorEnergy,
+			"matériaux":                     etfscraper.SectorMaterials,
+			"industrie":                     etfscraper.SectorIndustrials,
+			"consommation discrétionnaire":  etfscraper.SectorConsumerDiscretionary,
+			"biens de consommation de base": etfscraper.SectorConsumerStaples,
+			"soins de santé":                etfscraper.SectorHealthcare,
+			"finance":                       etfscraper.SectorFinancials,
+			"technologies de l'information": etfscraper.SectorInformationTechnology,
+			"services de communication":     etfscraper.SectorTelecommunication,
+			"services aux collectivités":    etfscraper.SectorUtilities,
+			"immobilier":                    etfscraper.SectorRealEstate,
+		},
+		LocationMapping: map[string]etfscraper.Location{
+			"états-unis":       etfscraper.LocationUnitedStates,
+			"united states":    etfscraper.LocationUnitedStates,
+			"royaume-uni":      etfscraper.LocationUnitedKingdom,
+			"united kingdom":   etfscraper.LocationUnitedKingdom,
+			"japon":            etfscraper.LocationJapan,
+			"japan":            etfscraper.LocationJapan,
+			"allemagne":        etfscraper.LocationGermany,
+			"germany":          etfscraper.LocationGermany,
+			"france":           etfscraper.LocationFrance,
+			"suisse":           etfscraper.LocationSwitzerland,
+			"switzerland":      etfscraper.LocationSwitzerland,
+			"canada":           etfscraper.LocationCanada,
+			"australie":        etfscraper.LocationAustralia,
+			"australia":        etfscraper.LocationAustralia,
+			"chine":            etfscraper.LocationChina,
+			"china":            etfscraper.LocationChina,
+			"corée du sud":     etfscraper.LocationSouthKorea,
+			"south korea":      etfscraper.LocationSouthKorea,
+			"brésil":           etfscraper.LocationBrazil,
+			"brazil":           etfscraper.LocationBrazil,
+			"pays-bas":         etfscraper.LocationNetherlands,
+			"netherlands":      etfscraper.LocationNetherlands,
+			"suède":            etfscraper.LocationSweden,
+			"sweden":           etfscraper.LocationSweden,
+			"italie":           etfscraper.LocationItaly,
+			"italy":            etfscraper.LocationItaly,
+			"espagne":          etfscraper.LocationSpain,
+			"spain":            etfscraper.LocationSpain,
+			"irlande":          etfscraper.LocationIreland,
+			"ireland":          etfscraper.LocationIreland,
+			"danemark":         etfscraper.LocationDenmark,
+			"denmark":          etfscraper.LocationDenmark,
+			"finlande":         etfscraper.LocationFinland,
+			"finland":          etfscraper.LocationFinland,
+			"belgique":         etfscraper.LocationBelgium,
+			"belgium":          etfscraper.LocationBelgium,
+			"autriche":         etfscraper.LocationAustria,
+			"austria":          etfscraper.LocationAustria,
+			"luxembourg":       etfscraper.LocationLuxembourg,
+			"singapour":        etfscraper.LocationSingapore,
+			"singapore":        etfscraper.LocationSingapore,
+			"norvège":          etfscraper.LocationNorway,
+			"norway":           etfscraper.LocationNorway,
+			"israël":           etfscraper.LocationIsrael,
+			"israel":           etfscraper.LocationIsrael,
+			"hong kong":        etfscraper.LocationHongKong,
+			"nouvelle-zélande": etfscraper.LocationNewZealand,
+			"pologne":          etfscraper.LocationPoland,
+			"poland":           etfscraper.LocationPoland,
+			"portugal":         etfscraper.LocationPortugal,
+		},
+	},
 }
 
 // SupportedRegions returns all supported region codes.
