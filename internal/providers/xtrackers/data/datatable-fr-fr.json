@@ -1,0 +1,294 @@
+{
+  "values": [
+    {
+      "ID": {
+        "value": "IE00BK1PV551",
+        "sortValue": "IE00BK1PV551",
+        "type": "isin"
+      },
+      "column_0": {
+        "column_0_0": {
+          "value": {
+            "text": "Xtrackers MSCI World UCITS ETF 1D",
+            "name": "Xtrackers MSCI World UCITS ETF 1D",
+            "url": "/fr-fr/IE00BK1PV551-msci-world-ucits-etf-1d/"
+          },
+          "sortValue": "Xtrackers MSCI World UCITS ETF 1D",
+          "type": "link"
+        },
+        "column_0_1": {
+          "value": "<strong>IE00BK1PV551</strong>",
+          "sortValue": null,
+          "type": "text"
+        }
+      },
+      "AssetClass": {
+        "value": "Actions",
+        "sortValue": "Actions",
+        "type": "text"
+      },
+      "AssetUnderManagement": {
+        "value": "16,39 Mrd.",
+        "sortValue": 16390000000,
+        "type": "text"
+      },
+      "Currency": {
+        "value": "USD",
+        "sortValue": "USD",
+        "type": "text"
+      },
+      "TotalExpenseRatio": {
+        "value": "0,12",
+        "sortValue": 0.12,
+        "type": "text"
+      },
+      "UseOfProfit": {
+        "value": "Distribution",
+        "sortValue": "Distribution",
+        "type": "text"
+      },
+      "FundLaunchDate": {
+        "value": "22/07/2014",
+        "sortValue": 1405987200000,
+        "type": "text"
+      },
+      "PerformanceDate": {
+        "value": "30/04/2026",
+        "sortValue": 1777680000000,
+        "type": "text"
+      }
+    },
+    {
+      "ID": {
+        "value": "IE00BJ0KDQ92",
+        "sortValue": "IE00BJ0KDQ92",
+        "type": "isin"
+      },
+      "column_0": {
+        "column_0_0": {
+          "value": {
+            "text": "Xtrackers MSCI World UCITS ETF 1C",
+            "name": "Xtrackers MSCI World UCITS ETF 1C",
+            "url": "/fr-fr/IE00BJ0KDQ92-msci-world-ucits-etf-1c/"
+          },
+          "sortValue": "Xtrackers MSCI World UCITS ETF 1C",
+          "type": "link"
+        },
+        "column_0_1": {
+          "value": "<strong>IE00BJ0KDQ92</strong>",
+          "sortValue": null,
+          "type": "text"
+        }
+      },
+      "AssetClass": {
+        "value": "Actions",
+        "sortValue": "Actions",
+        "type": "text"
+      },
+      "AssetUnderManagement": {
+        "value": "12,54 Mrd.",
+        "sortValue": 12540000000,
+        "type": "text"
+      },
+      "Currency": {
+        "value": "USD",
+        "sortValue": "USD",
+        "type": "text"
+      },
+      "TotalExpenseRatio": {
+        "value": "0,19",
+        "sortValue": 0.19,
+        "type": "text"
+      },
+      "UseOfProfit": {
+        "value": "Capitalisation",
+        "sortValue": "Capitalisation",
+        "type": "text"
+      },
+      "FundLaunchDate": {
+        "value": "04/03/2014",
+        "sortValue": 1393891200000,
+        "type": "text"
+      },
+      "PerformanceDate": {
+        "value": "30/04/2026",
+        "sortValue": 1777680000000,
+        "type": "text"
+      }
+    },
+    {
+      "ID": {
+        "value": "LU0274208692",
+        "sortValue": "LU0274208692",
+        "type": "isin"
+      },
+      "column_0": {
+        "column_0_0": {
+          "value": {
+            "text": "Xtrackers MSCI Europe UCITS ETF 1C",
+            "name": "Xtrackers MSCI Europe UCITS ETF 1C",
+            "url": "/fr-fr/LU0274208692-msci-europe-ucits-etf-1c/"
+          },
+          "sortValue": "Xtrackers MSCI Europe UCITS ETF 1C",
+          "type": "link"
+        },
+        "column_0_1": {
+          "value": "<strong>LU0274208692</strong>",
+          "sortValue": null,
+          "type": "text"
+        }
+      },
+      "AssetClass": {
+        "value": "Actions",
+        "sortValue": "Actions",
+        "type": "text"
+      },
+      "AssetUnderManagement": {
+        "value": "4,02 Mrd.",
+        "sortValue": 4020000000,
+        "type": "text"
+      },
+      "Currency": {
+        "value": "EUR",
+        "sortValue": "EUR",
+        "type": "text"
+      },
+      "TotalExpenseRatio": {
+        "value": "0,12",
+        "sortValue": 0.12,
+        "type": "text"
+      },
+      "UseOfProfit": {
+        "value": "Capitalisation",
+        "sortValue": "Capitalisation",
+        "type": "text"
+      },
+      "FundLaunchDate": {
+        "value": "22/01/2007",
+        "sortValue": 1169424000000,
+        "type": "text"
+      },
+      "PerformanceDate": {
+        "value": "30/04/2026",
+        "sortValue": 1777680000000,
+        "type": "text"
+      }
+    },
+    {
+      "ID": {
+        "value": "LU0290357846",
+        "sortValue": "LU0290357846",
+        "type": "isin"
+      },
+      "column_0": {
+        "column_0_0": {
+          "value": {
+            "text": "Xtrackers II EUR Corporate Bond UCITS ETF 1C",
+            "name": "Xtrackers II EUR Corporate Bond UCITS ETF 1C",
+            "url": "/fr-fr/LU0290357846-ii-eur-corporate-bond-ucits-etf-1c/"
+          },
+          "sortValue": "Xtrackers II EUR Corporate Bond UCITS ETF 1C",
+          "type": "link"
+        },
+        "column_0_1": {
+          "value": "<strong>LU0290357846</strong>",
+          "sortValue": null,
+          "type": "text"
+        }
+      },
+      "AssetClass": {
+        "value": "Obligations",
+        "sortValue": "Obligations",
+        "type": "text"
+      },
+      "AssetUnderManagement": {
+        "value": "5,98 Mrd.",
+        "sortValue": 5980000000,
+        "type": "text"
+      },
+      "Currency": {
+        "value": "EUR",
+        "sortValue": "EUR",
+        "type": "text"
+      },
+      "TotalExpenseRatio": {
+        "value": "0,16",
+        "sortValue": 0.16,
+        "type": "text"
+      },
+      "UseOfProfit": {
+        "value": "Capitalisation",
+        "sortValue": "Capitalisation",
+        "type": "text"
+      },
+      "FundLaunchDate": {
+        "value": "22/06/2007",
+        "sortValue": 1182470400000,
+        "type": "text"
+      },
+      "PerformanceDate": {
+        "value": "30/04/2026",
+        "sortValue": 1777680000000,
+        "type": "text"
+      }
+    },
+    {
+      "ID": {
+        "value": "DE000A0S9GB0",
+        "sortValue": "DE000A0S9GB0",
+        "type": "isin"
+      },
+      "column_0": {
+        "column_0_0": {
+          "value": {
+            "text": "Xtrackers Physical Gold ETC (EUR)",
+            "name": "Xtrackers Physical Gold ETC (EUR)",
+            "url": "/fr-fr/DE000A0S9GB0-physical-gold-etc-eur/"
+          },
+          "sortValue": "Xtrackers Physical Gold ETC (EUR)",
+          "type": "link"
+        },
+        "column_0_1": {
+          "value": "<strong>DE000A0S9GB0</strong>",
+          "sortValue": null,
+          "type": "text"
+        }
+      },
+      "AssetClass": {
+        "value": "Matières premières",
+        "sortValue": "Matières premières",
+        "type": "text"
+      },
+      "AssetUnderManagement": {
+        "value": "4,56 Mrd.",
+        "sortValue": 4560000000,
+        "type": "text"
+      },
+      "Currency": {
+        "value": "EUR",
+        "sortValue": "EUR",
+        "type": "text"
+      },
+      "TotalExpenseRatio": {
+        "value": "0,36",
+        "sortValue": 0.36,
+        "type": "text"
+      },
+      "UseOfProfit": {
+        "value": "Capitalisation",
+        "sortValue": "Capitalisation",
+        "type": "text"
+      },
+      "FundLaunchDate": {
+        "value": "13/11/2007",
+        "sortValue": 1194912000000,
+        "type": "text"
+      },
+      "PerformanceDate": {
+        "value": "30/04/2026",
+        "sortValue": 1777680000000,
+        "type": "text"
+      }
+    }
+  ]
+}

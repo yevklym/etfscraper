@@ -1,0 +1,80 @@
+{
+  "tables": [
+    {
+      "columns": [
+        {"key": "header", "value": "ISIN", "alignment": "left"},
+        {"key": "column_0", "value": "Nom", "alignment": "left"},
+        {"key": "column_1", "value": "Pondération en %", "alignment": "right"},
+        {"key": "column_2", "value": "Valeur de marché", "alignment": "right"},
+        {"key": "column_3", "value": "Pays", "alignment": "left"},
+        {"key": "column_4", "value": "Secteur", "alignment": "left"},
+        {"key": "column_5", "value": "Classe d'actifs", "alignment": "left"}
+      ],
+      "values": [
+        {
+          "header": {"value": "US67066G1040", "type": "text"},
+          "column_0": {"value": "NVIDIA CORP", "type": "text"},
+          "column_1": {"value": "5,610%", "sortValue": 5.61000000, "type": "text"},
+          "column_2": {"value": "1,35 Mrd. USD", "sortValue": 1351876635.72, "type": "text"},
+          "column_3": {"value": "États-Unis", "type": "text"},
+          "column_4": {"value": "Technologies de l'information", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "US0378331005", "type": "text"},
+          "column_0": {"value": "APPLE INC", "type": "text"},
+          "column_1": {"value": "4,648%", "sortValue": 4.64800000, "type": "text"},
+          "column_2": {"value": "1,12 Mrd. USD", "sortValue": 1119179537.77, "type": "text"},
+          "column_3": {"value": "États-Unis", "type": "text"},
+          "column_4": {"value": "Technologies de l'information", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "US0231351067", "type": "text"},
+          "column_0": {"value": "AMAZON COM INC", "type": "text"},
+          "column_1": {"value": "2,838%", "sortValue": 2.83800000, "type": "text"},
+          "column_2": {"value": "683,72 Mio. USD", "sortValue": 683719810.26, "type": "text"},
+          "column_3": {"value": "États-Unis", "type": "text"},
+          "column_4": {"value": "Consommation discrétionnaire", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "JP3633400001", "type": "text"},
+          "column_0": {"value": "TOYOTA MOTOR CORP", "type": "text"},
+          "column_1": {"value": "0,351%", "sortValue": 0.35120000, "type": "text"},
+          "column_2": {"value": "84,61 Mio. USD", "sortValue": 84610000.00, "type": "text"},
+          "column_3": {"value": "Japon", "type": "text"},
+          "column_4": {"value": "Consommation discrétionnaire", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "US46625H1005", "type": "text"},
+          "column_0": {"value": "JPMORGAN CHASE", "type": "text"},
+          "column_1": {"value": "0,981%", "sortValue": 0.98100000, "type": "text"},
+          "column_2": {"value": "236,32 Mio. USD", "sortValue": 236320000.00, "type": "text"},
+          "column_3": {"value": "États-Unis", "type": "text"},
+          "column_4": {"value": "Finance", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "NL0010273215", "type": "text"},
+          "column_0": {"value": "ASML HOLDING NV", "type": "text"},
+          "column_1": {"value": "0,425%", "sortValue": 0.42500000, "type": "text"},
+          "column_2": {"value": "102,38 Mio. USD", "sortValue": 102380000.00, "type": "text"},
+          "column_3": {"value": "Pays-Bas", "type": "text"},
+          "column_4": {"value": "Technologies de l'information", "type": "text"},
+          "column_5": {"value": "Equity", "type": "text"}
+        },
+        {
+          "header": {"value": "_CURRENCYUSD", "type": "text"},
+          "column_0": {"value": "US DOLLAR", "type": "text"},
+          "column_1": {"value": "0,012%", "sortValue": 0.01200000, "type": "text"},
+          "column_2": {"value": "2,89 Mio. USD", "sortValue": 2890000.00, "type": "text"},
+          "column_3": {"value": "--", "type": "text"},
+          "column_4": {"value": "", "type": "text"},
+          "column_5": {"value": "Cash", "type": "text"}
+        }
+      ]
+    }
+  ]
+}
