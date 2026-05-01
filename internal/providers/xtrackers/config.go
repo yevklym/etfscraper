@@ -37,7 +37,7 @@ var regionConfigs = map[string]regionConfig{
 			"Sec-Fetch-Mode": "cors",
 			"Sec-Fetch-Dest": "empty",
 		},
-		CookieAcceptTexts: []string{"Alle Cookies akzeptieren"},
+		CookieAcceptTexts: []string{"Alle Cookies akzeptieren", "Accept all cookies"},
 		RoleTexts:         []string{"Privat"},
 		DistributionTerms: []string{"distributing", "ausschüttend", "distribution"},
 		AssetClassMapping: map[string]etfscraper.AssetClass{
@@ -136,7 +136,7 @@ var regionConfigs = map[string]regionConfig{
 			"Sec-Fetch-Mode": "cors",
 			"Sec-Fetch-Dest": "empty",
 		},
-		CookieAcceptTexts: []string{"Accept all cookies"},
+		CookieAcceptTexts: []string{"Accept all cookies", "Alle Cookies akzeptieren"},
 		RoleTexts:         []string{"Private", "Private Investor"},
 		DistributionTerms: []string{"distributing"},
 		AssetClassMapping: map[string]etfscraper.AssetClass{
@@ -210,7 +210,7 @@ var regionConfigs = map[string]regionConfig{
 			"Sec-Fetch-Mode": "cors",
 			"Sec-Fetch-Dest": "empty",
 		},
-		CookieAcceptTexts: []string{"Accept all cookies"},
+		CookieAcceptTexts: []string{"Accept all cookies", "Alle Cookies akzeptieren"},
 		RoleTexts:         []string{"Particuliers"},
 		DistributionTerms: []string{"distribution"},
 		AssetClassMapping: map[string]etfscraper.AssetClass{
