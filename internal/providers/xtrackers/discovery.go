@@ -58,7 +58,7 @@ type column0NameValue struct {
 }
 
 func (c *Client) discoverFresh(ctx context.Context) ([]etfscraper.Fund, error) {
-	body, err := json.Marshal(discoveryRequestBody())
+	body, err := json.Marshal(c.config.DiscoveryBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
