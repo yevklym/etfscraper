@@ -142,7 +142,7 @@ func (c *Client) convertToFunds(entries []datatableEntry) []etfscraper.Fund {
 			ExpenseRatio:   parseTER(e.TotalExpenseRatio.Value),
 			TotalAssets:    parseAUM(e.AssetUnderManagement.SortValue),
 			AssetClass:     normalizeAssetClass(e.AssetClass.Value, c.config.AssetClassMapping),
-			IsDistributing: isDistributing(e.UseOfProfit.Value),
+			IsDistributing: isDistributing(e.UseOfProfit.Value, c.config.DistributionTerms),
 			InceptionDate:  parseLaunchDate(e.FundLaunchDate.Value),
 			LastUpdated:    parseLastUpdated(e.PerformanceDate.Value),
 		}

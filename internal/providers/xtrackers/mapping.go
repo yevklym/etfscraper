@@ -64,10 +64,15 @@ func normalizeLocation(value string, mapping map[string]etfscraper.Location) etf
 	return etfscraper.Location(trimmed)
 }
 
-// isDistributing returns whether the fund distributes based on the UseOfProfit field.
-func isDistributing(useOfProfit string) bool {
+// isDistributing returns whether the fund distributes based on the UseOfProfit field and provided locale terms.
+func isDistributing(useOfProfit string, terms []string) bool {
 	lower := strings.ToLower(strings.TrimSpace(useOfProfit))
-	return strings.Contains(lower, "distributing") || strings.Contains(lower, "ausschüttend")
+	for _, term := range terms {
+		if strings.Contains(lower, strings.ToLower(term)) {
+			return true
+		}
+	}
+	return false
 }
 
 // parseAUM parses an AUM value from the API's sortValue field.

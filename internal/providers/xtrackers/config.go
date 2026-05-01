@@ -12,9 +12,12 @@ type regionConfig struct {
 	DiscoveryPath     string
 	Locale            string
 	DefaultHeaders    map[string]string
+	CookieAcceptTexts []string // button texts for cookie consent (matched via includes)
+	RoleTexts         []string // element texts for investor role selection (matched via exact trim)
 	AssetClassMapping map[string]etfscraper.AssetClass
 	SectorMapping     map[string]etfscraper.Sector
 	LocationMapping   map[string]etfscraper.Location
+	DistributionTerms []string // substrings that indicate a distributing fund (UseOfProfit field)
 }
 
 var regionConfigs = map[string]regionConfig{
@@ -33,6 +36,9 @@ var regionConfigs = map[string]regionConfig{
 			"Sec-Fetch-Mode": "cors",
 			"Sec-Fetch-Dest": "empty",
 		},
+		CookieAcceptTexts: []string{"Alle Cookies akzeptieren"},
+		RoleTexts:         []string{"Privat"},
+		DistributionTerms: []string{"distributing", "ausschüttend", "distribution"},
 		AssetClassMapping: map[string]etfscraper.AssetClass{
 			"aktien":    etfscraper.AssetClassEquity,
 			"renten":    etfscraper.AssetClassBond,
@@ -125,6 +131,9 @@ var regionConfigs = map[string]regionConfig{
 			"Sec-Fetch-Mode": "cors",
 			"Sec-Fetch-Dest": "empty",
 		},
+		CookieAcceptTexts: []string{"Accept all cookies"},
+		RoleTexts:         []string{"Private", "Private Investor"},
+		DistributionTerms: []string{"distributing"},
 		AssetClassMapping: map[string]etfscraper.AssetClass{
 			"equities":     etfscraper.AssetClassEquity,
 			"fixed income": etfscraper.AssetClassBond,
