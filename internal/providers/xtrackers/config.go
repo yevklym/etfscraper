@@ -18,6 +18,7 @@ type regionConfig struct {
 	SectorMapping     map[string]etfscraper.Sector
 	LocationMapping   map[string]etfscraper.Location
 	DistributionTerms []string // substrings that indicate a distributing fund (UseOfProfit field)
+	DiscoveryBody     map[string]any
 }
 
 var regionConfigs = map[string]regionConfig{
@@ -44,6 +45,10 @@ var regionConfigs = map[string]regionConfig{
 			"renten":    etfscraper.AssetClassBond,
 			"rohstoffe": etfscraper.AssetClassCommodity,
 			"equity":    etfscraper.AssetClassEquity,
+		},
+		DiscoveryBody: map[string]any{
+			"searchTerm": "",
+			"filters":    []any{},
 		},
 		SectorMapping: map[string]etfscraper.Sector{
 			"energie":                 etfscraper.SectorEnergy,
@@ -142,6 +147,10 @@ var regionConfigs = map[string]regionConfig{
 			"alternatives": etfscraper.AssetClassAlternative,
 			"equity":       etfscraper.AssetClassEquity,
 		},
+		DiscoveryBody: map[string]any{
+			"searchTerm": "",
+			"filters":    []any{},
+		},
 		SectorMapping: map[string]etfscraper.Sector{
 			"energy":                 etfscraper.SectorEnergy,
 			"materials":              etfscraper.SectorMaterials,
@@ -211,6 +220,12 @@ var regionConfigs = map[string]regionConfig{
 			"equity":             etfscraper.AssetClassEquity,
 			"cash":               etfscraper.AssetClassCash,
 		},
+		DiscoveryBody: map[string]any{
+			"selectedTabIndex": 0,
+			"totalReturnType":  0,
+			"searchTerm":       "",
+			"filters":          []any{},
+		},
 		SectorMapping: map[string]etfscraper.Sector{
 			"énergie":                       etfscraper.SectorEnergy,
 			"matériaux":                     etfscraper.SectorMaterials,
@@ -277,18 +292,6 @@ var regionConfigs = map[string]regionConfig{
 			"portugal":         etfscraper.LocationPortugal,
 		},
 	},
-}
-
-// discoveryRequestBody returns the exact JSON payload expected by the /datatable API.
-// The selectedTabIndex and totalReturnType fields are required by the French locale
-// and are ignored by other locales.
-func discoveryRequestBody() map[string]any {
-	return map[string]any{
-		"selectedTabIndex": 0,
-		"totalReturnType":  0,
-		"searchTerm":       "",
-		"filters":          []any{},
-	}
 }
 
 // SupportedRegions returns all supported region codes.
