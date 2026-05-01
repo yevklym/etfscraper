@@ -114,6 +114,10 @@ const (
 	LocationEurope        Location = "Europe"
 	LocationAsia          Location = "Asia"
 	LocationGlobal        Location = "Global"
+	LocationHongKong      Location = "Hong Kong"
+	LocationNewZealand    Location = "New Zealand"
+	LocationPoland        Location = "Poland"
+	LocationPortugal      Location = "Portugal"
 )
 
 // ProviderName constants for supported providers.
