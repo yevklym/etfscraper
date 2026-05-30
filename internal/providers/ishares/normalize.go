@@ -90,7 +90,7 @@ func normalizeExchange(value string) etfscraper.Exchange {
 	normalized := strings.ToUpper(trimmed)
 
 	switch normalized {
-	case "NYSE", "NEW YORK STOCK EXCHANGE":
+	case "NYSE", "NEW YORK STOCK EXCHANGE", "NEW YORK STOCK EXCHANGE INC.", "NEW YORK STOCK EXCHANGE, INC.":
 		return etfscraper.ExchangeNYSE
 	case "NASDAQ":
 		return etfscraper.ExchangeNASDAQ
@@ -104,6 +104,8 @@ func normalizeExchange(value string) etfscraper.Exchange {
 		return etfscraper.ExchangeEuronext
 	case "XETRA":
 		return etfscraper.ExchangeXetra
+	case "SIX", "SIX SWISS EXCHANGE":
+		return etfscraper.ExchangeSIX
 	case "TSE", "TOKYO STOCK EXCHANGE":
 		return etfscraper.ExchangeTSE
 	case "HKEX", "HONG KONG EXCHANGE":

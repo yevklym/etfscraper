@@ -1,6 +1,6 @@
 // Package ishares provides a client for fetching iShares ETF data.
 //
-// The client supports multiple regions (US, DE) and allows configuration
+// The client supports multiple regions (US, DE, UK, FR, CH) and allows configuration
 // through functional options.
 //
 // Example usage:

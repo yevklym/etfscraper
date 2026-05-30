@@ -73,6 +73,8 @@ func (r *columnResolver) normalizeNumber(s string) string {
 	s = strings.ReplaceAll(s, "$", "")
 	s = strings.ReplaceAll(s, "€", "")
 	s = strings.ReplaceAll(s, "'", "") // Swiss thousands separator
+	s = strings.ReplaceAll(s, "’", "") // Swiss thousands separator (curly apostrophe)
+	s = strings.ReplaceAll(s, "‘", "") // Swiss thousands separator (curly apostrophe)
 
 	lastComma := strings.LastIndex(s, ",")
 	lastDot := strings.LastIndex(s, ".")

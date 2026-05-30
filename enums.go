@@ -56,6 +56,7 @@ const (
 	ExchangeLSE      Exchange = "LSE"      // London Stock Exchange
 	ExchangeEuronext Exchange = "Euronext" // Euronext
 	ExchangeXetra    Exchange = "Xetra"    // Xetra
+	ExchangeSIX      Exchange = "SIX"      // SIX Swiss Exchange
 	ExchangeTSE      Exchange = "TSE"      // Tokyo Stock Exchange
 	ExchangeHKEX     Exchange = "HKEX"     // Hong Kong Exchange
 	ExchangeSSE      Exchange = "SSE"      // Shanghai Stock Exchange
