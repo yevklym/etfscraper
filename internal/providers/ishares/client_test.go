@@ -24,7 +24,7 @@ func TestNew(t *testing.T) {
 	})
 
 	t.Run("supported regions", func(t *testing.T) {
-		regions := []string{"us", "de", "US", "DE"}
+		regions := []string{"us", "de", "uk", "fr", "ch", "US", "DE", "UK", "FR", "CH"}
 
 		for _, region := range regions {
 			_, err := New(region)

@@ -216,6 +216,16 @@ func TestColumnResolver_NormalizeNumber(t *testing.T) {
 			want:  "1234567.89",
 		},
 		{
+			name:  "Swiss format with curly apostrophe",
+			input: "1’234’567.89",
+			want:  "1234567.89",
+		},
+		{
+			name:  "Swiss format with left curly apostrophe",
+			input: "1‘234‘567.89",
+			want:  "1234567.89",
+		},
+		{
 			name:  "with dollar sign",
 			input: "$1,234.56",
 			want:  "1234.56",
