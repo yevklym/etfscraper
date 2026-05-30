@@ -269,6 +269,60 @@ func TestParseHoldings_GermanDottedDate(t *testing.T) {
 	}
 }
 
+func TestParseHoldings_SwissFormat(t *testing.T) {
+	csvData := "iShares S&P 500 B UCITS ETF (Acc)\n" +
+		"Fund Holdings as of,\"30/May/2026\"\n" +
+		"Shares Outstanding,\"100'000'000.00\"\n" +
+		"\n" +
+		"Ticker,Name,Asset Class,Market Value,Weight (%),Shares,Price,Location,Exchange,Market Currency\n" +
+		"\"NOVN\",\"NOVARTIS AG\",\"Equity\",\"9'106'871.33\",\"3.10\",\"910'687.00\",\"100.00\",\"Switzerland\",\"SIX Swiss Exchange\",\"CHF\"\n" +
+		"\"NESN\",\"NESTLE SA\",\"Equity\",\"8'341'276.35\",\"2.90\",\"834'127.00\",\"10.00\",\"Switzerland\",\"SIX Swiss Exchange\",\"CHF\"\n" +
+		"\n"
+
+	c, err := New("ch")
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	fund := &etfscraper.Fund{Ticker: "CSPX", Name: "iShares S&P 500 B UCITS ETF (Acc)"}
+
+	snapshot, err := c.parseHoldings(context.Background(), strings.NewReader(csvData), fund)
+	if err != nil {
+		t.Fatalf("parseHoldings failed: %v", err)
+	}
+
+	expectedDate := time.Date(2026, time.May, 30, 0, 0, 0, 0, time.UTC)
+	if !snapshot.AsOfDate.Equal(expectedDate) {
+		t.Errorf("Expected AsOfDate %v, got %v", expectedDate, snapshot.AsOfDate)
+	}
+
+	if snapshot.TotalHoldings != 2 {
+		t.Errorf("Expected 2 holdings, got %d", snapshot.TotalHoldings)
+	}
+
+	novartis := snapshot.Holdings[0]
+	if novartis.Ticker != "NOVN" {
+		t.Errorf("Expected first ticker NOVN, got %s", novartis.Ticker)
+	}
+	if novartis.Exchange != etfscraper.ExchangeSIX {
+		t.Errorf("Expected exchange %s, got %s", etfscraper.ExchangeSIX, novartis.Exchange)
+	}
+	if novartis.Currency != etfscraper.CurrencyCHF {
+		t.Errorf("Expected currency CHF, got %s", novartis.Currency)
+	}
+
+	epsilon := 0.01
+	if diff := novartis.MarketValue - 9106871.33; diff > epsilon || diff < -epsilon {
+		t.Errorf("Expected market value 9106871.33, got %f", novartis.MarketValue)
+	}
+	if diff := novartis.Weight - 0.031; diff > 0.0001 || diff < -0.0001 {
+		t.Errorf("Expected weight ~0.031, got %f", novartis.Weight)
+	}
+	if diff := novartis.Quantity - 910687.0; diff > epsilon || diff < -epsilon {
+		t.Errorf("Expected quantity 910687.0, got %f", novartis.Quantity)
+	}
+}
+
 func TestParseHoldings_WhitespaceOnlyRow(t *testing.T) {
 	// iShares DE CSVs sometimes include a whitespace-only row before the
 	// disclaimer. This row has a single column containing " " which must

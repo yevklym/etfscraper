@@ -217,6 +217,8 @@ func TestNormalizeExchange_CommonMappings(t *testing.T) {
 		{name: "xetra", input: "Xetra", expected: etfscraper.ExchangeXetra},
 		{name: "euronext", input: "Euronext Paris", expected: etfscraper.ExchangeEuronext},
 		{name: "nyse", input: "New York Stock Exchange", expected: etfscraper.ExchangeNYSE},
+		{name: "six code", input: "SIX", expected: etfscraper.ExchangeSIX},
+		{name: "six full", input: "SIX Swiss Exchange", expected: etfscraper.ExchangeSIX},
 	}
 
 	for _, test := range tests {
